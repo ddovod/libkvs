@@ -1,0 +1,25 @@
+language: cpp
+
+matrix:
+  include:
+    - os: linux
+      compiler: clang
+      dist: bionic
+      env:
+        - CC=clang-8
+        - CXX=clang++-8
+        - CC_FOR_BUILD=clang-8
+        - CXX_FOR_BUILD=clang++-8
+        - LD=lld-8
+      before_script:
+        - curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        - echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-7 main" | sudo tee -a /etc/apt/sources.list
+        - sudo apt-get update -qq
+        - sudo apt-get install clang-8 lld-8 -y
+      script:
+        - sudo mv /usr/bin/ld /usr/bin/ld.old && sudo ln -s /usr/bin/lld-8 /usr/bin/ld
+        - mkdir build && cd build
+        - cmake -DCMAKE_BUILD_TYPE=Debug ..
+        - make -j4
+
+        
