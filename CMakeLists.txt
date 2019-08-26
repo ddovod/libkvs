@@ -7,6 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(libkvs STATIC "")
 target_sources(libkvs PRIVATE
   src/IStorage.cpp
+  src/VirtualStorage.cpp
   )
 target_include_directories(libkvs PUBLIC
   src
@@ -16,7 +17,6 @@ set_target_properties(libkvs PROPERTIES
   )
 target_compile_options(libkvs PRIVATE
   -fno-rtti
-  -fno-exceptions
   -fcolor-diagnostics
   -fno-ident
   -fno-stack-protector
