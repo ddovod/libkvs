@@ -33,3 +33,6 @@ target_compile_options(libkvs PRIVATE
 
 ### example app
 add_subdirectory(example)
+
+### tests
+add_subdirectory(tests)
