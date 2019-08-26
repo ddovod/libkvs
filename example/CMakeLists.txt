@@ -12,3 +12,6 @@ target_include_directories(kvs-example PRIVATE
 target_link_libraries(kvs-example PRIVATE
   libkvs
   )
+set_target_properties(kvs-example PROPERTIES
+  CXX_STANDARD 17
+  )
