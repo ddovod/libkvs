@@ -4,6 +4,7 @@
 #include "IStorage.hpp"
 #include "IVirtualStorage.hpp"
 #include "SimpleInMemoryStorage.hpp"
+#include "Status.hpp"
 #include "utility/StringUtils.hpp"
 
 #include <iostream>
@@ -53,15 +54,19 @@ namespace kvs
 
     Status VirtualStorage::deleteValue(const Key& key)
     {
-        bool nodeFound = false;
-        // for (const auto& storage : resolveNodes(key.getPath())) {
-        //     nodeFound = true;
-        //     auto status = storage->getValue(key, value);
-        //     if (status.isOk()) {
-        //         return status;
-        //     }
-        // }
-        return Status{nodeFound ? Status::FailReason::kKeyNotFound : Status::FailReason::kNodeNotFound};
+        const auto& storages = resolveNodes(key.getPath());
+        if (storages.empty()) {
+            return Status{Status::FailReason::kNodeNotFound};
+        }
+
+        for (const auto& storage : storages) {
+            auto status = storage->deleteValue(key);
+            if (status.isOk()) {
+                return {};
+            }
+        }
+
+        return Status{Status::FailReason::kKeyNotFound};
     }
 
     std::vector<std::shared_ptr<IStorage>> VirtualStorage::resolveNodes(const std::string& path)

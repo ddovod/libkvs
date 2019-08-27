@@ -28,6 +28,9 @@ TEST_CASE("Basic get/put")
         CHECK(status.isOk());
         CHECK(retrievedValue.getType() == kvs::ValueType::kInt32);
         CHECK(retrievedValue.getValue<int32_t>() == value);
+
+        status = storage->deleteValue({key, path});
+        CHECK(status.isOk());
     }
 
     {
@@ -42,5 +45,8 @@ TEST_CASE("Basic get/put")
         CHECK(status.isOk());
         CHECK(retrievedValue.getType() == kvs::ValueType::kString);
         CHECK(retrievedValue.getValue<std::string>() == value);
+
+        status = storage->deleteValue({key, path});
+        CHECK(status.isOk());
     }
 }

@@ -33,7 +33,11 @@ namespace kvs
 
     Status SimpleInMemoryStorage::deleteValue(const Key& key)
     {
-        m_map.erase(key.getKey());
+        auto found = m_map.find(key.getKey());
+        if (found == m_map.end()) {
+            return Status{Status::FailReason::kKeyNotFound};
+        }
+        m_map.erase(found);
         return {};
     }
 }
