@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 #include "Key.hpp"
-#include "Value.hpp"
 #include "Status.hpp"
+#include "Value.hpp"
 
 namespace kvs
 {
