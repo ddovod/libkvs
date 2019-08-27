@@ -1,50 +1,70 @@
 
 #include "VirtualStorage.hpp"
+#include <memory>
 #include "IStorage.hpp"
 #include "IVirtualStorage.hpp"
+#include "SimpleInMemoryStorage.hpp"
 #include "utility/StringUtils.hpp"
+
+#include <iostream>
 
 namespace kvs
 {
     MountResult VirtualStorage::mount(const MountOptions& mountOptions)
     {
-        MountResult result;
-        (void)mountOptions;
+        Node* node = &m_rootNode;
+        for (const auto& comp : split(mountOptions.storageMountPath, "/")) {
+            auto found = node->children.find(comp);
+            if (found == node->children.end()) {
+                auto newNode = std::make_unique<Node>();
+                auto newNodePtr = newNode.get();
+                node->children[comp] = std::move(newNode);
+                node = newNodePtr;
+            } else {
+                node = found->second.get();
+            }
+        }
+        node->storages.push_back(std::make_shared<SimpleInMemoryStorage>());
 
-        return result;
+        return {};
     }
 
     Status VirtualStorage::getValue(const Key& key, Value* value)
     {
-        auto nodeStorage = resolveNode(key.getPath());
-        if (!nodeStorage) {
-            return Status{Status::FailReason::kNodeNotFound};
+        if (const auto& storages = resolveNodes(key.getPath()); !storages.empty()) {
+            for (const auto& storage : resolveNodes(key.getPath())) {
+                auto status = storage->getValue(key, value);
+                if (status.isOk()) {
+                    return status;
+                }
+            }
+            return Status{Status::FailReason::kKeyNotFound};
         }
-
-        return nodeStorage->getValue(key, value);
+        return Status{Status::FailReason::kNodeNotFound};
     }
 
     Status VirtualStorage::putValue(const Key& key, const Value& value)
     {
-        auto nodeStorage = resolveNode(key.getPath());
-        if (!nodeStorage) {
-            return Status{Status::FailReason::kNodeNotFound};
+        if (const auto& storages = resolveNodes(key.getPath()); !storages.empty()) {
+            return storages.front()->putValue(key, value);
         }
-
-        return nodeStorage->putValue(key, value);
+        return Status{Status::FailReason::kNodeNotFound};
     }
 
     Status VirtualStorage::deleteValue(const Key& key)
     {
-        auto nodeStorage = resolveNode(key.getPath());
-        if (!nodeStorage) {
-            return Status{Status::FailReason::kNodeNotFound};
-        }
-
-        return nodeStorage->deleteValue(key);
+        bool nodeFound = false;
+        // for (const auto& storage : resolveNodes(key.getPath())) {
+        //     nodeFound = true;
+        //     auto status = storage->getValue(key, value);
+        //     if (status.isOk()) {
+        //         return status;
+        //     }
+        // }
+        return Status{nodeFound ? Status::FailReason::kKeyNotFound : Status::FailReason::kNodeNotFound};
     }
 
-    std::shared_ptr<IStorage> VirtualStorage::resolveNode(const std::string& path)
+    std::vector<std::shared_ptr<IStorage>> VirtualStorage::resolveNodes(const std::string& path)
     {
         Node* node = &m_rootNode;
         for (const auto& comp : split(path, "/")) {
@@ -54,6 +74,6 @@ namespace kvs
             }
             node = found->second.get();
         }
-        return node->storage;
+        return node->storages;
     }
 }

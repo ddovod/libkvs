@@ -19,11 +19,11 @@ namespace kvs
     private:
         struct Node
         {
-            std::shared_ptr<IStorage> storage;
+            std::vector<std::shared_ptr<IStorage>> storages;
             std::unordered_map<std::string, std::unique_ptr<Node>> children;
         };
         Node m_rootNode;
 
-        std::shared_ptr<IStorage> resolveNode(const std::string& path);
+        std::vector<std::shared_ptr<IStorage>> resolveNodes(const std::string& path);
     };
 }

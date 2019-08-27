@@ -8,6 +8,7 @@ add_library(libkvs STATIC "")
 target_sources(libkvs PRIVATE
   src/IStorage.cpp
   src/VirtualStorage.cpp
+  src/SimpleInMemoryStorage.cpp
   
   src/utility/TimeUtils.cpp
   )

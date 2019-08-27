@@ -10,6 +10,7 @@ namespace kvs
     class Record
     {
     public:
+        Record() = default;
         Record(ValueType valueType,
             const std::vector<uint8_t>& rawValue,
             int64_t creationTimestampMs,
