@@ -17,6 +17,11 @@ namespace kvs
         Value() = default;
         Value(int32_t value) { detail::ValueTraits<int32_t>::setValue(value, m_value, m_type); }
         Value(const std::string& value) { detail::ValueTraits<std::string>::setValue(value, m_value, m_type); }
+        Value(ValueType valueType, const std::vector<uint8_t>& rawValue)
+            : m_value(rawValue)
+            , m_type(valueType)
+        {
+        }
 
         ValueType getType() const { return m_type; }
 
@@ -25,6 +30,8 @@ namespace kvs
         {
             return detail::ValueTraits<std::decay_t<T>>::getValue(m_value, m_type);
         }
+
+        const std::vector<uint8_t>& getRawValue() const { return m_value; }
 
     private:
         std::vector<uint8_t> m_value;
