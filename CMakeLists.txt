@@ -3,6 +3,12 @@ cmake_minimum_required(VERSION 3.10)
 project(libkvs)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+### index-cpp
+add_library(index-cpp INTERFACE)
+target_include_directories(index-cpp INTERFACE
+  libs/index-cpp/src
+  )
+
 ### libkvs
 add_library(libkvs STATIC "")
 target_sources(libkvs PRIVATE
@@ -33,6 +39,7 @@ target_compile_options(libkvs PRIVATE
   -Wvexing-parse
   -Werror=return-type
   )
+target_link_libraries(libkvs index-cpp)
 
 ### example app
 add_subdirectory(example)
