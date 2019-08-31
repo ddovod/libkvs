@@ -4,7 +4,6 @@
 #include <iostream>
 #include <memory>
 #include "IStorage.hpp"
-#include "IVirtualStorage.hpp"
 
 int main()
 {

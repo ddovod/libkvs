@@ -2,7 +2,6 @@
 #include <doctest.h>
 #include <memory>
 #include "IStorage.hpp"
-#include "IVirtualStorage.hpp"
 #include "VirtualStorage.hpp"
 
 TEST_CASE("Basic get/put")

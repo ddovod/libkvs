@@ -2,14 +2,17 @@
 #pragma once
 
 #include <unordered_map>
+#include "ICompositeStorage.hpp"
 #include "IStorage.hpp"
-#include "IVirtualStorage.hpp"
+#include "IStorageRegistry.hpp"
 
 namespace kvs
 {
-    class VirtualStorage : public IVirtualStorage
+    class VirtualStorage : public ICompositeStorage, public IStorage
     {
     public:
+        VirtualStorage();
+
         MountResult mount(const MountOptions& mountOptions) override;
 
         Status getValue(const Key& key, Value* value) override;
@@ -17,13 +20,21 @@ namespace kvs
         Status deleteValue(const Key& key) override;
 
     private:
+        struct MountedStorage
+        {
+            IStorage* storage = nullptr;
+            int priority = 0;
+        };
+
         struct Node
         {
-            std::vector<std::shared_ptr<IStorage>> storages;
+            std::vector<MountedStorage> storages;
             std::unordered_map<std::string, std::unique_ptr<Node>> children;
         };
+
+        std::unique_ptr<IStorageRegistry> m_storageRegistry;
         Node m_rootNode;
 
-        std::vector<std::shared_ptr<IStorage>> resolveNodes(const std::string& path);
+        Node* resolveNode(const std::string& path);
     };
 }
