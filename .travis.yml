@@ -2,7 +2,8 @@ language: cpp
 
 matrix:
   include:
-    - os: linux
+    - name: "Compilation"
+      os: linux
       compiler: clang
       dist: bionic
       env:
@@ -22,7 +23,8 @@ matrix:
         - cmake -DCMAKE_BUILD_TYPE=Debug ..
         - make -j4
 
-    - os: linux
+    - name: "Tests ASAN"
+      os: linux
       compiler: clang
       dist: bionic
       env:
@@ -43,7 +45,8 @@ matrix:
         - make -j4
         - ./tests/kvs-tests
 
-    - os: linux
+    - name: "Tests TSAN"
+      os: linux
       compiler: clang
       dist: bionic
       env:
