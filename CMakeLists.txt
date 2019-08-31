@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 ### index-cpp
 add_library(index-cpp INTERFACE)
 target_include_directories(index-cpp INTERFACE
-  libs/index-cpp/src
+  libs/index-cpp/include
   )
 
 ### libkvs
@@ -15,6 +15,8 @@ target_sources(libkvs PRIVATE
   src/IStorage.cpp
   src/VirtualStorage.cpp
   src/SimpleInMemoryStorage.cpp
+  src/LinearHashStorageRegistry.cpp
+  src/LinearHashStorage.cpp
   
   src/utility/TimeUtils.cpp
   )
