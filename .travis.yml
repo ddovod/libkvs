@@ -41,7 +41,7 @@ matrix:
       script:
         - sudo mv /usr/bin/ld /usr/bin/ld.old && sudo ln -s /usr/bin/lld-8 /usr/bin/ld
         - mkdir build && cd build
-        - cmake -DCMAKE_BUILD_TYPE=Debug -DKVS_TESTS_ASAN ..
+        - cmake -DCMAKE_BUILD_TYPE=Debug -DKVS_TESTS_ASAN=ON ..
         - make -j4
         - ./tests/kvs-tests
 
@@ -63,6 +63,6 @@ matrix:
       script:
         - sudo mv /usr/bin/ld /usr/bin/ld.old && sudo ln -s /usr/bin/lld-8 /usr/bin/ld
         - mkdir build && cd build
-        - cmake -DCMAKE_BUILD_TYPE=Debug -DKVS_TESTS_TSAN ..
+        - cmake -DCMAKE_BUILD_TYPE=Debug -DKVS_TESTS_TSAN=ON ..
         - make -j4
         - ./tests/kvs-tests
