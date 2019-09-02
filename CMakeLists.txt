@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 ### index-cpp
 add_library(index-cpp INTERFACE)
 target_include_directories(index-cpp INTERFACE
-  libs/index-cpp/include
+  libs/index-cpp/src
   )
 
 ### libkvs

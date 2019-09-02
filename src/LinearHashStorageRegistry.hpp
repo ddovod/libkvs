@@ -18,7 +18,7 @@ namespace kvs
     private:
         struct StorageEntry
         {
-            std::unique_ptr<IStorage> storage;
+            std::unique_ptr<LinearHashStorage> storage;
             int counter = 0;
         };
 

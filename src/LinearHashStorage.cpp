@@ -1,39 +1,61 @@
 
 #include "LinearHashStorage.hpp"
+#include <memory>
+#include "Record.hpp"
+#include "linear_hashing_table.h"
 #include "utility/TimeUtils.hpp"
 
 namespace kvs
 {
+    LinearHashStorage::LinearHashStorage(LinearHashStorage::StorageType storageType)
+    {
+        switch (storageType) {
+            case StorageType::kDisk: {
+                // m_bucketManager = std::make_unique<ContainerT::FileBucketManager>(32);
+                // break;
+            }
+            case StorageType::kMemory: {
+                m_bucketManager = std::make_unique<ContainerT::TransientBucketManager>(32);
+                break;
+            }
+        }
+        m_values = std::make_unique<LinearHashingTable<std::string, Record>>(m_bucketManager.get());
+    }
+
     Status LinearHashStorage::getValue(const Key& key, Value* value)
     {
-        auto found = m_map.find(key.getKey());
-        if (found == m_map.end()) {
+        Record record;
+        auto found = m_values->find(key.getKey(), record);
+        if (!found) {
             return Status{Status::FailReason::kKeyNotFound};
         }
 
-        if (found->second.getExpirationTimestampMs() < getTimestampMs()) {
-            m_map.erase(found);
+        if (record.getExpirationTimestampMs() < getTimestampMs()) {
+            m_values->remove(key.getKey(), record);
             return Status{Status::FailReason::kKeyNotFound};
         }
 
-        *value = Value{found->second.getValueType(), found->second.getRawValue()};
+        *value = Value(record.getValueType(), record.getRawValue());
         return {};
     }
 
     Status LinearHashStorage::putValue(const Key& key, const Value& value)
     {
-        m_map[key.getKey()] =
-            Record{value.getType(), value.getRawValue(), getTimestampMs(), std::numeric_limits<int64_t>::max()};
+        m_values->insert(key.getKey(),
+            Record{value.getType(), value.getRawValue(), getTimestampMs(), std::numeric_limits<int64_t>::max()});
         return {};
     }
 
     Status LinearHashStorage::deleteValue(const Key& key)
     {
-        auto found = m_map.find(key.getKey());
-        if (found == m_map.end()) {
+        Record record;
+        auto found = m_values->find(key.getKey(), record);
+        if (!found) {
             return Status{Status::FailReason::kKeyNotFound};
         }
-        m_map.erase(found);
+        m_values->remove(key.getKey(), record);
         return {};
     }
+
+    void LinearHashStorage::flush() { m_bucketManager->flush(); }
 }

@@ -14,7 +14,10 @@
 
 namespace kvs
 {
-    VirtualStorage::VirtualStorage() { m_storageRegistry = std::make_unique<LinearHashStorageRegistry>(); }
+    VirtualStorage::VirtualStorage()
+        : m_storageRegistry(std::make_unique<LinearHashStorageRegistry>())
+    {
+    }
 
     MountResult VirtualStorage::mount(const MountOptions& mountOptions)
     {
