@@ -8,12 +8,14 @@
 #include "LinearHashStorage.hpp"
 #include "Node.hpp"
 #include "StorageNode.hpp"
+#include "json.hpp"
 
 namespace kvs
 {
     struct LoadStorageOptions
     {
         std::string path;
+        HashTableParams hashTableParams;
     };
 
     class LoadStorageResult
@@ -74,10 +76,20 @@ namespace kvs
     private:
         struct TreeNode
         {
-            std::unique_ptr<Node> node;
-            std::unordered_map<std::string, std::unique_ptr<Node>> children;
+            Node node;
+            std::unique_ptr<IStorage> storage;
+            std::unordered_map<std::string, std::unique_ptr<TreeNode>> children;
         };
+
+        std::string m_filepath;
         TreeNode m_rootNode;
-        bool m_loaded = false;
+        bool m_isLoaded = false;
+        bool m_isDirty = false;
+
+        void fromJson(const json& j, TreeNode& node);
+        void toJson(json& j, const TreeNode& node);
+        void saveNodes();
+        TreeNode* findTreeNode(const std::string& path);
+        void loadStorage(StorageNode& storageNode, TreeNode& treeNode, const HashTableParams& hashTableParams);
     };
 }

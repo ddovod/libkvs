@@ -22,6 +22,7 @@ namespace kvs
 
         LoadStorageOptions loadOptions;
         loadOptions.path = options.volumePath;
+        loadOptions.hashTableParams = options.hashTableParams;
         auto loadResult = found->second->loadStorage(loadOptions);
         if (!loadResult.isOk()) {
             return StorageAcquisitionResult{{}, StorageAcquisitionResult::Status::kStorageLoadError};

@@ -35,6 +35,8 @@ target_sources(libkvs PRIVATE
   src/Volume.cpp
   
   src/utility/TimeUtils.cpp
+  src/utility/StringUtils.cpp
+  src/utility/FilesystemUtils.cpp
   )
 target_include_directories(libkvs PUBLIC
   src
