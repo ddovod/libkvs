@@ -1,22 +1,28 @@
 language: cpp
 
+aliases:
+  &before_script_common:
+    - curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    - echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-7 main" | sudo tee -a /etc/apt/sources.list
+    - sudo apt-get update -qq
+    - sudo apt-get install clang-8 lld-8 -y
+    - sudo mv /usr/bin/ld /usr/bin/ld.old && sudo ln -s /usr/bin/lld-8 /usr/bin/ld
+
+  &env_common:
+    - CC=clang-8
+    - CXX=clang++-8
+    - CC_FOR_BUILD=clang-8
+    - CXX_FOR_BUILD=clang++-8
+    - LD=lld-8
+
 matrix:
   include:
     - name: "Compilation"
       os: linux
       compiler: clang
       dist: bionic
-      env:
-        - CC=clang-8
-        - CXX=clang++-8
-        - CC_FOR_BUILD=clang-8
-        - CXX_FOR_BUILD=clang++-8
-        - LD=lld-8
-      before_script:
-        - curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        - echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-7 main" | sudo tee -a /etc/apt/sources.list
-        - sudo apt-get update -qq
-        - sudo apt-get install clang-8 lld-8 -y
+      env: *env_common
+      before_script: *before_script_common
       script:
         - sudo mv /usr/bin/ld /usr/bin/ld.old && sudo ln -s /usr/bin/lld-8 /usr/bin/ld
         - mkdir build && cd build
@@ -27,20 +33,9 @@ matrix:
       os: linux
       compiler: clang
       dist: bionic
-      env:
-        - CC=clang-8
-        - CXX=clang++-8
-        - CC_FOR_BUILD=clang-8
-        - CXX_FOR_BUILD=clang++-8
-        - LD=lld-8
-      before_script:
-        - curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        - echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-7 main" | sudo tee -a /etc/apt/sources.list
-        - sudo apt-get update -qq
-        - sudo apt-get install clang-8 lld-8 -y
-        - sudo ln -s /usr/bin/clang-tidy-8 /usr/bin/clang-tidy
+      env: *env_common
+      before_script: *before_script_common
       script:
-        - sudo mv /usr/bin/ld /usr/bin/ld.old && sudo ln -s /usr/bin/lld-8 /usr/bin/ld
         - mkdir build && cd build
         - cmake -DCMAKE_BUILD_TYPE=Debug ..
         - cd ..
@@ -50,19 +45,9 @@ matrix:
       os: linux
       compiler: clang
       dist: bionic
-      env:
-        - CC=clang-8
-        - CXX=clang++-8
-        - CC_FOR_BUILD=clang-8
-        - CXX_FOR_BUILD=clang++-8
-        - LD=lld-8
-      before_script:
-        - curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        - echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-7 main" | sudo tee -a /etc/apt/sources.list
-        - sudo apt-get update -qq
-        - sudo apt-get install clang-8 lld-8 -y
+      env: *env_common
+      before_script: *before_script_common
       script:
-        - sudo mv /usr/bin/ld /usr/bin/ld.old && sudo ln -s /usr/bin/lld-8 /usr/bin/ld
         - mkdir build && cd build
         - cmake -DCMAKE_BUILD_TYPE=Debug -DKVS_TESTS_ASAN=ON ..
         - make -j4
@@ -72,19 +57,9 @@ matrix:
       os: linux
       compiler: clang
       dist: bionic
-      env:
-        - CC=clang-8
-        - CXX=clang++-8
-        - CC_FOR_BUILD=clang-8
-        - CXX_FOR_BUILD=clang++-8
-        - LD=lld-8
-      before_script:
-        - curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        - echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-7 main" | sudo tee -a /etc/apt/sources.list
-        - sudo apt-get update -qq
-        - sudo apt-get install clang-8 lld-8 -y
+      env: *env_common
+      before_script: *before_script_common
       script:
-        - sudo mv /usr/bin/ld /usr/bin/ld.old && sudo ln -s /usr/bin/lld-8 /usr/bin/ld
         - mkdir build && cd build
         - cmake -DCMAKE_BUILD_TYPE=Debug -DKVS_TESTS_TSAN=ON ..
         - make -j4
