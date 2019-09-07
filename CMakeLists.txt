@@ -9,6 +9,21 @@ target_include_directories(index-cpp INTERFACE
   libs/index-cpp/src
   )
 
+### json
+add_library(json INTERFACE)
+target_include_directories(json INTERFACE
+  libs/json/include
+  )
+
+### teenypath
+add_library(teenypath STATIC "")
+target_sources(teenypath PRIVATE
+  libs/teenypath/src/teenypath.cpp
+  )
+target_include_directories(teenypath PUBLIC
+  libs/teenypath/include
+  )
+
 ### libkvs
 add_library(libkvs STATIC "")
 target_sources(libkvs PRIVATE
@@ -42,7 +57,7 @@ target_compile_options(libkvs PRIVATE
   -Wvexing-parse
   -Werror=return-type
   )
-target_link_libraries(libkvs index-cpp)
+target_link_libraries(libkvs index-cpp json teenypath)
 
 ### example app
 add_subdirectory(example)
