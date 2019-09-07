@@ -72,7 +72,7 @@ namespace kvs
         storageNode.storage = treeNode.storage.get();
         for (auto& child : treeNode.children) {
             auto childNode = std::make_unique<StorageNode>();
-            loadStorage(*childNode.get(), *child.second.get(), hashTableParams);
+            loadStorage(*childNode, *child.second, hashTableParams);
             storageNode.children[child.first] = std::move(childNode);
         }
     }
@@ -96,7 +96,7 @@ namespace kvs
             const std::string childValue = child["value"];
 
             auto childNode = std::make_unique<TreeNode>();
-            fromJson(childValue, *childNode.get());
+            fromJson(childValue, *childNode);
             node.children[childKey] = std::move(childNode);
         }
     }
@@ -107,7 +107,7 @@ namespace kvs
         j["node"]["overflowFilepath"] = node.node.overflowFilepath;
         for (const auto& child : node.children) {
             json childJson;
-            toJson(childJson, *child.second.get());
+            toJson(childJson, *child.second);
 
             json pairJson;
             pairJson["key"] = child.first;

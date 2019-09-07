@@ -82,7 +82,7 @@ namespace kvs
             if (found == node.children.end()) {
                 found = node.children.insert({child.first, std::make_unique<Node>()}).first;
             }
-            mount(*found->second.get(), *child.second.get(), priority);
+            mount(*found->second, *child.second, priority);
         }
     }
 
@@ -120,7 +120,7 @@ namespace kvs
         for (auto& child : storageNode.children) {
             auto foundNode = node.children.find(child.first);
             assert(foundNode != node.children.end());
-            unmount(*foundNode->second.get(), *child.second.get());
+            unmount(*foundNode->second, *child.second);
         }
     }
 

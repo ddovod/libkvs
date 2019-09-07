@@ -67,7 +67,7 @@ namespace kvs
         found->second.second++;
 
         for (auto& child : storageNode.children) {
-            acquireStorage(*child.second.get(), volumeFilepath, volumePath + "/" + child.first);
+            acquireStorage(*child.second, volumeFilepath, volumePath + "/" + child.first);
         }
     }
 }
