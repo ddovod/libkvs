@@ -17,21 +17,28 @@ namespace kvs
         m_filepath = filepath;
 
         auto parentPath = path{filepath}.parent_path();
-        if (!parentPath.exists()) {
-            mkdirp(getcwd(), parentPath);
+        if (parentPath.string() != filepath) {
+            m_parentPath = parentPath.string();
+            if (!parentPath.exists()) {
+                mkdirp(getcwd(), parentPath);
+            }
         }
 
-        std::fstream volumeFile{filepath};
+        std::fstream volumeFile{filepath, std::fstream::in | std::fstream::out | std::fstream::trunc};
         if (!volumeFile.is_open()) {
             m_isLoaded = false;
             return;
         }
 
-        json nodesJson;
-        volumeFile >> nodesJson;
+        std::string volumeString((std::istreambuf_iterator<char>(volumeFile)), std::istreambuf_iterator<char>());
 
-        if (nodesJson.is_object()) {
-            fromJson(nodesJson, m_rootNode);
+        if (!volumeString.empty()) {
+            json nodesJson;
+            volumeFile >> nodesJson;
+
+            if (nodesJson.is_object()) {
+                fromJson(nodesJson, m_rootNode);
+            }
         }
 
         m_isLoaded = true;
@@ -135,8 +142,8 @@ namespace kvs
             if (found == node->children.end()) {
                 auto name = generateString();
                 auto newNode = std::make_unique<TreeNode>();
-                newNode->node.primaryFilepath = "primary_" + name;
-                newNode->node.overflowFilepath = "overflow_" + name;
+                newNode->node.primaryFilepath = (kvs::path(m_parentPath) / kvs::path("primary_" + name)).string();
+                newNode->node.overflowFilepath = (kvs::path(m_parentPath) / kvs::path("overflow_" + name)).string();
                 found = node->children.emplace(comp, std::move(newNode)).first;
                 m_isDirty = true;
             }
