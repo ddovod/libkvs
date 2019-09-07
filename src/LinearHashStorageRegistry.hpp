@@ -2,10 +2,13 @@
 #pragma once
 
 #include <memory>
+#include <unordered_map>
 #include <unordered_set>
 #include "IStorage.hpp"
 #include "IStorageRegistry.hpp"
 #include "LinearHashStorage.hpp"
+#include "StorageNode.hpp"
+#include "Volume.hpp"
 
 namespace kvs
 {
@@ -16,13 +19,10 @@ namespace kvs
         StorageReleaseResult releaseStorage(const StorageReleaseOptions& options) override;
 
     private:
-        struct StorageEntry
-        {
-            std::unique_ptr<LinearHashStorage> storage;
-            int counter = 0;
-        };
+        std::unordered_map<std::string, std::unique_ptr<Volume>> m_volumes;
+        std::unordered_map<std::string, std::pair<IStorage*, int>> m_storageCounters;
+        std::unordered_map<IStorage*, std::string> m_storageKeys;
 
-        std::unordered_map<std::string, StorageEntry> m_storageMap;
-        std::unordered_map<IStorage*, std::string> m_inverseStorageMap;
+        void acquireStorage(StorageNode& storageNode, const std::string& volumeFilepath, const std::string& volumePath);
     };
 }

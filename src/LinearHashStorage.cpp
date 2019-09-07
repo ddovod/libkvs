@@ -1,25 +1,31 @@
 
 #include "LinearHashStorage.hpp"
 #include <memory>
+#include <vector>
 #include "Record.hpp"
+#include "ValueType.hpp"
+#include "buffer.h"
 #include "linear_hashing_table.h"
 #include "utility/TimeUtils.hpp"
 
 namespace kvs
 {
-    LinearHashStorage::LinearHashStorage(LinearHashStorage::StorageType storageType)
+    LinearHashStorage::LinearHashStorage(const LinearHashStorageParams& params)
     {
-        switch (storageType) {
-            case StorageType::kDisk: {
-                // m_bucketManager = std::make_unique<ContainerT::FileBucketManager>(32);
-                // break;
-            }
-            case StorageType::kMemory: {
-                m_bucketManager = std::make_unique<ContainerT::TransientBucketManager>(32);
-                break;
-            }
-        }
-        m_values = std::make_unique<LinearHashingTable<std::string, Record>>(m_bucketManager.get());
+        m_bucketManager = std::make_unique<HashTable::FileBucketManager>(params.hashTableParams.bucketCapacity,
+            params.hashTableParams.minBucketsCount,
+            params.primaryFilepath.c_str(),
+            params.overflowFilepath.c_str(),
+            serialize,
+            deserialize,
+            params.hashTableParams.maxRecordSizeBytes,
+#ifdef BOOST_BIG_ENDIAN
+            Buffer::Endian::BIG,
+#else
+            Buffer::Endian::LITTLE,
+#endif
+            params.hashTableParams.bucketCacheSizeBytes);
+        m_values = std::make_unique<HashTable>(m_bucketManager.get());
     }
 
     Status LinearHashStorage::getValue(const Key& key, Value* value)
@@ -57,5 +63,31 @@ namespace kvs
         return {};
     }
 
-    void LinearHashStorage::flush() { m_bucketManager->flush(); }
+    void LinearHashStorage::serialize(const std::string& key, const Record& value, Buffer& buffer)
+    {
+        buffer.put_uint64(key.size());
+        buffer.put_chars(key.data(), key.size());
+
+        buffer.put_ubyte(static_cast<uint8_t>(value.getValueType()));
+        buffer.put_int64(value.getCreationTimestampMs());
+        buffer.put_int64(value.getExpirationTimestampMs());
+        const auto& rawValue = value.getRawValue();
+        buffer.put_uint64(rawValue.size());
+        buffer.put_bytes(rawValue.data(), rawValue.size());
+    }
+
+    void LinearHashStorage::deserialize(Buffer& buffer, std::string& key, Record& value)
+    {
+        size_t keySize = buffer.get_uint64();
+        key.resize(keySize);
+        buffer.get_chars(key.data(), keySize);
+
+        auto valueType = static_cast<ValueType>(buffer.get_ubyte());
+        auto creationTime = buffer.get_int64();
+        auto expirationTime = buffer.get_int64();
+        auto valueSize = buffer.get_uint64();
+        std::vector<uint8_t> rawValue(valueSize);
+        buffer.get_bytes(rawValue.data(), valueSize);
+        value = Record(valueType, rawValue, creationTime, expirationTime);
+    }
 }

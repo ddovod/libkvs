@@ -35,4 +35,6 @@ namespace kvs
         res.push_back(str.substr(previous, current - previous));
         return res;
     }
+
+    std::string generateString(size_t length = 16);
 }

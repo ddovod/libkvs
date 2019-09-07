@@ -4,13 +4,16 @@
 #include <cassert>
 #include <memory>
 #include "IStorage.hpp"
+#include "LinearHashStorage.hpp"
+#include "StorageNode.hpp"
 
 namespace kvs
 {
     struct StorageAcquisitionOptions
     {
         std::string volumeFilePath;
-        std::string volumeMountPath;
+        std::string volumePath;
+        HashTableParams hashTableParams;
     };
 
     class StorageAcquisitionResult
@@ -19,15 +22,15 @@ namespace kvs
         enum class Status
         {
             kOk,
-            kFileNotFound,
-            kNodeNotFound,
+            kVolumeLoadError,
+            kStorageLoadError,
         };
 
-        StorageAcquisitionResult(IStorage* storage, Status status)
-            : m_storage(storage)
+        StorageAcquisitionResult(StorageNode root, Status status)
+            : m_root(std::move(root))
             , m_status(status)
         {
-            if (m_storage == nullptr) {
+            if (m_root.storage == nullptr) {
                 assert(m_status != Status::kOk);
             } else {
                 assert(m_status == Status::kOk);
@@ -36,10 +39,10 @@ namespace kvs
 
         bool isOk() const { return m_status == Status::kOk; }
         Status getStatus() const { return m_status; }
-        IStorage* getStorage() const { return m_storage; }
+        StorageNode& getRoot() { return m_root; }
 
     private:
-        IStorage* m_storage = nullptr;
+        StorageNode m_root;
         Status m_status = Status::kOk;
     };
 

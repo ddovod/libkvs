@@ -1,9 +1,11 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace kvs
 {
-    enum class ValueType
+    enum class ValueType : uint8_t
     {
         kUndefined = 0,
         kInt32,

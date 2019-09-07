@@ -17,6 +17,7 @@ target_sources(libkvs PRIVATE
   src/SimpleInMemoryStorage.cpp
   src/LinearHashStorageRegistry.cpp
   src/LinearHashStorage.cpp
+  src/Volume.cpp
   
   src/utility/TimeUtils.cpp
   )

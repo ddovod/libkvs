@@ -1,47 +1,72 @@
 
 #include "LinearHashStorageRegistry.hpp"
 #include <cassert>
+#include <cstdio>
 #include <memory>
 #include "IStorageRegistry.hpp"
 #include "LinearHashStorage.hpp"
+#include "Volume.hpp"
 
 namespace kvs
 {
     StorageAcquisitionResult LinearHashStorageRegistry::acquireStorage(const StorageAcquisitionOptions& options)
     {
-        auto key = options.volumeFilePath + ":" + options.volumeMountPath;
-        auto found = m_storageMap.find(key);
-        if (found == m_storageMap.end()) {
-            StorageEntry newEntry;
-            newEntry.storage = std::make_unique<LinearHashStorage>();
-            newEntry.counter = 1;
-            auto it = m_storageMap.insert({key, std::move(newEntry)});
-            found = it.first;
-            m_inverseStorageMap[found->second.storage.get()] = key;
-        } else {
-            assert(found->second.counter > 0);
-            found->second.counter++;
+        auto found = m_volumes.find(options.volumeFilePath);
+        if (found == m_volumes.end()) {
+            auto volume = std::make_unique<Volume>(options.volumeFilePath);
+            if (!volume->isOk()) {
+                return StorageAcquisitionResult{{}, StorageAcquisitionResult::Status::kVolumeLoadError};
+            }
+            found = m_volumes.emplace(options.volumeFilePath, std::move(volume)).first;
         }
 
-        return StorageAcquisitionResult{found->second.storage.get(), StorageAcquisitionResult::Status::kOk};
+        LoadStorageOptions loadOptions;
+        loadOptions.path = options.volumePath;
+        auto loadResult = found->second->loadStorage(loadOptions);
+        if (!loadResult.isOk()) {
+            return StorageAcquisitionResult{{}, StorageAcquisitionResult::Status::kStorageLoadError};
+        }
+
+        acquireStorage(loadResult.getRoot(), options.volumeFilePath, options.volumePath);
+
+        return StorageAcquisitionResult{std::move(loadResult.getRoot()), StorageAcquisitionResult::Status::kOk};
     }
 
     StorageReleaseResult LinearHashStorageRegistry::releaseStorage(const StorageReleaseOptions& options)
     {
-        auto keyFound = m_inverseStorageMap.find(options.storage);
-        if (keyFound == m_inverseStorageMap.end()) {
+        auto foundKey = m_storageKeys.find(options.storage);
+        if (foundKey == m_storageKeys.end()) {
             return StorageReleaseResult{StorageReleaseResult::Status::kStorageNotFound};
         }
 
-        auto found = m_storageMap.find(keyFound->second);
-        assert(found != m_storageMap.end());
-        found->second.counter--;
-        assert(found->second.counter >= 0);
-        if (found->second.counter == 0) {
-            m_storageMap.erase(found);
-            m_inverseStorageMap.erase(keyFound);
+        auto counterFound = m_storageCounters.find(foundKey->second);
+        assert(counterFound != m_storageCounters.end());
+
+        counterFound->second.second--;
+        assert(counterFound->second.second >= 0);
+
+        if (counterFound->second.second == 0) {
+            m_storageKeys.erase(foundKey);
+            m_storageCounters.erase(counterFound);
         }
 
         return StorageReleaseResult{StorageReleaseResult::Status::kOk};
+    }
+
+    void LinearHashStorageRegistry::acquireStorage(StorageNode& storageNode,
+        const std::string& volumeFilepath,
+        const std::string& volumePath)
+    {
+        const auto key = volumeFilepath + ":" + volumePath;
+        auto found = m_storageCounters.find(key);
+        if (found == m_storageCounters.end()) {
+            found = m_storageCounters.emplace(key, std::make_pair(storageNode.storage, 0)).first;
+            m_storageKeys[storageNode.storage] = key;
+        }
+        found->second.second++;
+
+        for (auto& child : storageNode.children) {
+            acquireStorage(*child.second.get(), volumeFilepath, volumePath + "/" + child.first);
+        }
     }
 }
