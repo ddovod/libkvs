@@ -1,7 +1,7 @@
 language: cpp
 
 _aliases:
-  before_script_common: &before_script_common:
+  before_script_common: &before_script_common
     - curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
     - echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-7 main" | sudo tee -a /etc/apt/sources.list
     - sudo apt-get update -qq
@@ -9,7 +9,7 @@ _aliases:
     - sudo apt-get install libboost-all-dev
     - sudo mv /usr/bin/ld /usr/bin/ld.old && sudo ln -s /usr/bin/lld-8 /usr/bin/ld
 
-  env_common: &env_common:
+  env_common: &env_common
     - CC=clang-8
     - CXX=clang++-8
     - CC_FOR_BUILD=clang-8
