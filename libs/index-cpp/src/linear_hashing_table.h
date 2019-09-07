@@ -389,7 +389,7 @@ public:
     // endian: The endianness with which to store integral values.
     FileBucketManager(size_t bucket_capacity, const char* primary_filename,
         const char* overflow_filename,
-        std::function<void(const KeyType, const ValueType, Buffer&)> serialize,
+        std::function<void(const KeyType&, const ValueType&, Buffer&)> serialize,
         std::function<void(Buffer&, KeyType&, ValueType&)> deserialize, size_t encoded_record_size,
         Buffer::Endian endian, size_t bucket_cache_size)
         : BucketManager(bucket_capacity), serialize_(serialize), deserialize_(deserialize),
@@ -409,7 +409,7 @@ public:
     // endian: The endianness with which to store integral values.
     FileBucketManager(size_t bucket_capacity, size_t min_bucket_count, const char* primary_filename,
         const char* overflow_filename,
-        std::function<void(const KeyType, const ValueType, Buffer&)> serialize,
+        std::function<void(const KeyType&, const ValueType&, Buffer&)> serialize,
         std::function<void(Buffer&, KeyType&, ValueType&)> deserialize, size_t encoded_record_size,
         Buffer::Endian endian, size_t bucket_cache_size)
         : BucketManager(bucket_capacity, min_bucket_count), serialize_(serialize),
@@ -431,7 +431,7 @@ public:
     // endian: The endianness with which to store integral values.
     FileBucketManager(size_t bucket_capacity, size_t min_bucket_count, double min_load_factor,
         double max_load_factor, const char* primary_filename, const char* overflow_filename,
-        std::function<void(const KeyType, const ValueType, Buffer&)> serialize,
+        std::function<void(const KeyType&, const ValueType&, Buffer&)> serialize,
         std::function<void(Buffer&, KeyType&, ValueType&)> deserialize, size_t encoded_record_size,
         Buffer::Endian endian, size_t bucket_cache_size)
         : BucketManager(bucket_capacity, min_bucket_count, min_load_factor, max_load_factor),
@@ -675,7 +675,7 @@ public:
       return result;
     }
 
-    std::function<void(const KeyType, const ValueType, Buffer&)> serialize_;
+    std::function<void(const KeyType&, const ValueType&, Buffer&)> serialize_;
     std::function<void(Buffer&, KeyType&, ValueType&)> deserialize_;
     size_t encoded_record_size_;
     Buffer::Endian endian_;
