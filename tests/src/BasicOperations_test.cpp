@@ -11,7 +11,7 @@ TEST_CASE("Basic get/put")
     kvs::MountOptions options;
     options.storageMountPath = "A";
     options.volumeFilePath = "basic_volume1.kvs";
-    options.volumeMountPath = "K";
+    options.volumePath = "K";
     auto result = storage->mount(options);
     CHECK(result.isOk());
 

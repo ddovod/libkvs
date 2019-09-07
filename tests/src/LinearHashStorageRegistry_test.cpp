@@ -12,11 +12,11 @@ TEST_CASE("Basic LinearHashStorageRegistry")
     {
         kvs::StorageAcquisitionOptions acquireOptions;
         acquireOptions.volumeFilePath = "lh1";
-        acquireOptions.volumeMountPath = "A";
+        acquireOptions.volumePath = "A";
 
         auto acquireResult = registry.acquireStorage(acquireOptions);
         CHECK(acquireResult.isOk());
-        storagePtr = acquireResult.getStorage();
+        storagePtr = acquireResult.getRoot().storage;
 
         kvs::StorageReleaseOptions releaseOptions;
         releaseOptions.storage = storagePtr;
@@ -35,7 +35,7 @@ TEST_CASE("Basic LinearHashStorageRegistry")
     {
         kvs::StorageAcquisitionOptions acquireOptions;
         acquireOptions.volumeFilePath = "lh1";
-        acquireOptions.volumeMountPath = "A";
+        acquireOptions.volumePath = "A";
 
         auto acquireResult = registry.acquireStorage(acquireOptions);
         CHECK(acquireResult.isOk());
@@ -44,7 +44,7 @@ TEST_CASE("Basic LinearHashStorageRegistry")
         CHECK(acquireResult.isOk());
 
         kvs::StorageReleaseOptions releaseOptions;
-        releaseOptions.storage = acquireResult.getStorage();
+        releaseOptions.storage = acquireResult.getRoot().storage;
         auto releaseResult = registry.releaseStorage(releaseOptions);
         CHECK(releaseResult.isOk());
 
