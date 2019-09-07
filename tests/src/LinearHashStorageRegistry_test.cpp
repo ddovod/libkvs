@@ -11,7 +11,7 @@ TEST_CASE("Basic LinearHashStorageRegistry")
     kvs::IStorage* storagePtr = nullptr;
     {
         kvs::StorageAcquisitionOptions acquireOptions;
-        acquireOptions.volumeFilePath = "lh1";
+        acquireOptions.volumeFilePath = "test_data/lh1.json";
         acquireOptions.volumePath = "A";
 
         auto acquireResult = registry.acquireStorage(acquireOptions);
@@ -34,7 +34,7 @@ TEST_CASE("Basic LinearHashStorageRegistry")
 
     {
         kvs::StorageAcquisitionOptions acquireOptions;
-        acquireOptions.volumeFilePath = "lh1";
+        acquireOptions.volumeFilePath = "test_data/lh1";
         acquireOptions.volumePath = "A";
 
         auto acquireResult = registry.acquireStorage(acquireOptions);
