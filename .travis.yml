@@ -46,8 +46,8 @@ matrix:
       env: *env_common
       before_script: *before_script_common
       script:
-        - sudo mv /usr/bin/clang-tidy /usr/bin/clang-tidy.old && sudo ln -s /usr/bin/clang-tidy-8 /usr/bin/clang-tidy
-        - sudo mv /usr/bin/clang-apply-replacements /usr/bin/clang-apply-replacements.old && sudo ln -s /usr/bin/clang-apply-replacements-8 /usr/bin/clang-apply-replacements
+        - sudo ln -s /usr/bin/clang-tidy-8 /usr/bin/clang-tidy
+        - sudo ln -s /usr/bin/clang-apply-replacements-8 /usr/bin/clang-apply-replacements
         - mkdir build && cd build
         - cmake -DCMAKE_BUILD_TYPE=Debug ..
         - cd ..
