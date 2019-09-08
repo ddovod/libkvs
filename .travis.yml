@@ -30,6 +30,15 @@ matrix:
         - cmake -DCMAKE_BUILD_TYPE=Debug ..
         - make -j4
 
+    - name: "clang-format"
+      os: linux
+      compiler: clang
+      dist: bionic
+      env: *env_common
+      before_script: *before_script_common
+      script:
+        - ./tools/format/run-clang-format.py -r src example tests
+
     - name: "clang-tidy"
       os: linux
       compiler: clang
