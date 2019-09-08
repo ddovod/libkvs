@@ -144,8 +144,8 @@ namespace kvs
             if (found == node->children.end()) {
                 auto name = generateString();
                 auto newNode = std::make_unique<TreeNode>();
-                newNode->node.primaryFilepath = (kvs::path(m_parentPath) / kvs::path("primary_" + name)).string();
-                newNode->node.overflowFilepath = (kvs::path(m_parentPath) / kvs::path("overflow_" + name)).string();
+                newNode->node.primaryFilepath = (kvs::path(m_parentPath) / kvs::path(name + "_primary")).string();
+                newNode->node.overflowFilepath = (kvs::path(m_parentPath) / kvs::path(name + "_overflow")).string();
                 found = node->children.emplace(comp, std::move(newNode)).first;
                 m_isDirty = true;
             }

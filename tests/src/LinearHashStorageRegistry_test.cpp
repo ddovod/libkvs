@@ -7,13 +7,13 @@
 TEST_CASE("Basic LinearHashStorageRegistry")
 {
     kvs::LinearHashStorageRegistry registry;
+    kvs::StorageAcquisitionOptions acquireOptions;
+    acquireOptions.volumeFilePath = "test_data/linear_hash_volume.json";
+    acquireOptions.volumePath = "A";
+    acquireOptions.hashTableParams.maxRecordSizeBytes = 1024;
 
     kvs::IStorage* storagePtr = nullptr;
     {
-        kvs::StorageAcquisitionOptions acquireOptions;
-        acquireOptions.volumeFilePath = "test_data/lh1.json";
-        acquireOptions.volumePath = "A";
-
         auto acquireResult = registry.acquireStorage(acquireOptions);
         CHECK(acquireResult.isOk());
         storagePtr = acquireResult.getRoot().storage;
@@ -33,10 +33,6 @@ TEST_CASE("Basic LinearHashStorageRegistry")
     }
 
     {
-        kvs::StorageAcquisitionOptions acquireOptions;
-        acquireOptions.volumeFilePath = "test_data/lh1";
-        acquireOptions.volumePath = "A";
-
         auto acquireResult = registry.acquireStorage(acquireOptions);
         CHECK(acquireResult.isOk());
 

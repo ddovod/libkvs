@@ -114,6 +114,7 @@ namespace kvs
         releaseOptions.storage = storageNode.storage;
         auto releaseResult = m_storageRegistry->releaseStorage(releaseOptions);
         assert(releaseResult.isOk());
+        (void)releaseResult;
 
         node.storages.erase(foundStorage);
         for (auto& child : storageNode.children) {
