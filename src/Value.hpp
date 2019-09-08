@@ -16,7 +16,13 @@ namespace kvs
     public:
         Value() = default;
         Value(int32_t value) { detail::ValueTraits<int32_t>::setValue(value, m_value, m_type); }
+        Value(uint32_t value) { detail::ValueTraits<uint32_t>::setValue(value, m_value, m_type); }
+        Value(int64_t value) { detail::ValueTraits<int64_t>::setValue(value, m_value, m_type); }
+        Value(uint64_t value) { detail::ValueTraits<uint64_t>::setValue(value, m_value, m_type); }
+        Value(float value) { detail::ValueTraits<float>::setValue(value, m_value, m_type); }
+        Value(double value) { detail::ValueTraits<double>::setValue(value, m_value, m_type); }
         Value(const std::string& value) { detail::ValueTraits<std::string>::setValue(value, m_value, m_type); }
+        Value(const Data& value) { detail::ValueTraits<Data>::setValue(value, m_value, m_type); }
         Value(ValueType valueType, const std::vector<uint8_t>& rawValue)
             : m_value(rawValue)
             , m_type(valueType)
