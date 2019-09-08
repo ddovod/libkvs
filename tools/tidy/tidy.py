@@ -85,3 +85,8 @@ subprocess.Popen(runClangTidyScriptPath +
                  '-header-filter "' + os.getcwd() + '/libs/**" ' +
                  '-quiet -p ./tidy_report',
                  shell=True).wait()
+
+if os.stat("tidy_report/fixes.yaml").st_size == 0:
+    exit(0)
+else:
+    exit(1)
