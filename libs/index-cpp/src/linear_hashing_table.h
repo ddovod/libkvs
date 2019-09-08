@@ -805,7 +805,7 @@ private:
 
   // Expand the number of primary buckets by adding a bucket to the end of the sequence of bucket
   // chains.
-  virtual void grow() {
+  void grow() {
     ++metadata_.primary_bucket_count;
     bucket_chains_.push_back(std::unique_ptr<Bucket>(
         bucket_manager_->new_primary_bucket(bucket_chains_.size())));

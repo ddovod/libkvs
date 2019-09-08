@@ -3,7 +3,7 @@
 
 namespace
 {
-    const char chars[] =
+    const char chars[] =  // NOLINT
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
