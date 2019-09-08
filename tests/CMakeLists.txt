@@ -10,6 +10,7 @@ target_sources(kvs-tests PRIVATE
   src/main.cpp
   src/BasicOperations_test.cpp
   src/LinearHashStorageRegistry_test.cpp
+  src/MountingNodes_test.cpp
   )
 target_include_directories(kvs-tests PRIVATE
   src
