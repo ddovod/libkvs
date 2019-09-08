@@ -31,6 +31,7 @@ namespace kvs
         };
 
         std::string m_filepath;
+        std::string m_volumeName;
         std::string m_parentPath;
         TreeNode m_rootNode;
         bool m_isLoaded = false;
