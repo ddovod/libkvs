@@ -1,5 +1,5 @@
 
-#include "Volume.hpp"
+#include "LinearHashVolume.hpp"
 #include <cassert>
 #include <fstream>
 #include <ios>
@@ -12,7 +12,7 @@
 
 namespace kvs
 {
-    Volume::Volume(const std::string& filepath)
+    LinearHashVolume::LinearHashVolume(const std::string& filepath)
     {
         m_filepath = filepath;
 
@@ -44,9 +44,9 @@ namespace kvs
         m_isLoaded = true;
     }
 
-    bool Volume::isOk() const { return m_isLoaded; }
+    bool LinearHashVolume::isOk() const { return m_isLoaded; }
 
-    LoadStorageResult Volume::loadStorage(const LoadStorageOptions& options)
+    LoadStorageResult LinearHashVolume::loadStorage(const LoadStorageOptions& options)
     {
         auto treeNode = findTreeNode(options.path);
         assert(treeNode != nullptr);
@@ -59,7 +59,9 @@ namespace kvs
         return LoadStorageResult{LoadStorageResult::Status::kOk, std::move(resultNode)};
     }
 
-    void Volume::loadStorage(StorageNode& storageNode, TreeNode& treeNode, const HashTableParams& hashTableParams)
+    void LinearHashVolume::loadStorage(StorageNode& storageNode,
+        TreeNode& treeNode,
+        const HashTableParams& hashTableParams)
     {
         if (!treeNode.storage) {
             LinearHashStorageParams storageParams;
@@ -77,7 +79,7 @@ namespace kvs
         }
     }
 
-    UnloadStorageResult Volume::unloadStorage(const UnloadStorageOptions& options)
+    UnloadStorageResult LinearHashVolume::unloadStorage(const UnloadStorageOptions& options)
     {
         auto treeNode = findTreeNode(options.path);
         assert(treeNode != nullptr);
@@ -87,7 +89,7 @@ namespace kvs
         return UnloadStorageResult{UnloadStorageResult::Status::kOk};
     }
 
-    void Volume::fromJson(const json& j, TreeNode& node)
+    void LinearHashVolume::fromJson(const json& j, TreeNode& node)
     {
         node.node.primaryFilepath = j["node"]["primaryFilepath"];
         node.node.overflowFilepath = j["node"]["overflowFilepath"];
@@ -101,7 +103,7 @@ namespace kvs
         }
     }
 
-    void Volume::toJson(json& j, const TreeNode& node)
+    void LinearHashVolume::toJson(json& j, const TreeNode& node)
     {
         j["node"]["primaryFilepath"] = node.node.primaryFilepath;
         j["node"]["overflowFilepath"] = node.node.overflowFilepath;
@@ -116,7 +118,7 @@ namespace kvs
         }
     }
 
-    void Volume::saveNodes()
+    void LinearHashVolume::saveNodes()
     {
         assert(m_isLoaded);
         if (!m_isDirty) {
@@ -134,7 +136,7 @@ namespace kvs
         m_isDirty = false;
     }
 
-    Volume::TreeNode* Volume::findTreeNode(const std::string& path)
+    LinearHashVolume::TreeNode* LinearHashVolume::findTreeNode(const std::string& path)
     {
         TreeNode* node = &m_rootNode;
         for (const auto& comp : split(path, "/")) {

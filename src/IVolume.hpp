@@ -1,14 +1,9 @@
 
 #pragma once
 
-#include <memory>
 #include <string>
-#include <unordered_map>
-#include "IStorage.hpp"
-#include "LinearHashStorage.hpp"
-#include "Node.hpp"
+#include "HashTableParams.hpp"
 #include "StorageNode.hpp"
-#include "json.hpp"
 
 namespace kvs
 {
@@ -64,33 +59,13 @@ namespace kvs
         Status m_status = Status::kOk;
     };
 
-    class Volume
+    class IVolume
     {
     public:
-        explicit Volume(const std::string& filepath);
-        bool isOk() const;
+        virtual ~IVolume() = default;
 
-        LoadStorageResult loadStorage(const LoadStorageOptions& options);
-        UnloadStorageResult unloadStorage(const UnloadStorageOptions& options);
-
-    private:
-        struct TreeNode
-        {
-            Node node;
-            std::unique_ptr<IStorage> storage;
-            std::unordered_map<std::string, std::unique_ptr<TreeNode>> children;
-        };
-
-        std::string m_filepath;
-        std::string m_parentPath;
-        TreeNode m_rootNode;
-        bool m_isLoaded = false;
-        bool m_isDirty = false;
-
-        void fromJson(const json& j, TreeNode& node);
-        void toJson(json& j, const TreeNode& node);
-        void saveNodes();
-        TreeNode* findTreeNode(const std::string& path);
-        void loadStorage(StorageNode& storageNode, TreeNode& treeNode, const HashTableParams& hashTableParams);
+        virtual bool isOk() const = 0;
+        virtual LoadStorageResult loadStorage(const LoadStorageOptions& options) = 0;
+        virtual UnloadStorageResult unloadStorage(const UnloadStorageOptions& options) = 0;
     };
 }

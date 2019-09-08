@@ -3,8 +3,8 @@
 
 #include <cassert>
 #include <memory>
+#include "HashTableParams.hpp"
 #include "IStorage.hpp"
-#include "LinearHashStorage.hpp"
 #include "StorageNode.hpp"
 
 namespace kvs

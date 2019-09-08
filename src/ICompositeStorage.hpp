@@ -3,8 +3,8 @@
 
 #include <memory>
 #include <string>
+#include "HashTableParams.hpp"
 #include "IStorage.hpp"
-#include "LinearHashStorage.hpp"
 
 namespace kvs
 {

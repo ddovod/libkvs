@@ -2,7 +2,7 @@
 #include <doctest.h>
 #include "IStorage.hpp"
 #include "IStorageRegistry.hpp"
-#include "LinearHashStorageRegistry.hpp"
+#include "linear_hashing/LinearHashStorageRegistry.hpp"
 
 TEST_CASE("Basic LinearHashStorageRegistry")
 {

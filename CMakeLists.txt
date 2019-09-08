@@ -27,13 +27,12 @@ target_include_directories(teenypath PUBLIC
 ### libkvs
 add_library(libkvs STATIC "")
 target_sources(libkvs PRIVATE
-  src/IStorage.cpp
   src/VirtualStorage.cpp
-  src/SimpleInMemoryStorage.cpp
-  src/LinearHashStorageRegistry.cpp
-  src/LinearHashStorage.cpp
-  src/Volume.cpp
-  
+
+  src/linear_hashing/LinearHashVolume.cpp
+  src/linear_hashing/LinearHashStorage.cpp
+  src/linear_hashing/LinearHashStorageRegistry.cpp
+
   src/utility/TimeUtils.cpp
   src/utility/StringUtils.cpp
   src/utility/FilesystemUtils.cpp

@@ -6,9 +6,8 @@
 #include "ICompositeStorage.hpp"
 #include "IStorage.hpp"
 #include "IStorageRegistry.hpp"
-#include "LinearHashStorageRegistry.hpp"
-#include "SimpleInMemoryStorage.hpp"
 #include "Status.hpp"
+#include "linear_hashing/LinearHashStorageRegistry.hpp"
 #include "utility/StringUtils.hpp"
 
 #include <iostream>

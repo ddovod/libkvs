@@ -5,7 +5,7 @@
 #include <memory>
 #include "IStorageRegistry.hpp"
 #include "LinearHashStorage.hpp"
-#include "Volume.hpp"
+#include "LinearHashVolume.hpp"
 
 namespace kvs
 {
@@ -13,7 +13,7 @@ namespace kvs
     {
         auto found = m_volumes.find(options.volumeFilePath);
         if (found == m_volumes.end()) {
-            auto volume = std::make_unique<Volume>(options.volumeFilePath);
+            auto volume = std::make_unique<LinearHashVolume>(options.volumeFilePath);
             if (!volume->isOk()) {
                 return StorageAcquisitionResult{{}, StorageAcquisitionResult::Status::kVolumeLoadError};
             }
