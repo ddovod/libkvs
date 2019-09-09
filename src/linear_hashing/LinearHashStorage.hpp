@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 #include "HashTable.hpp"
 #include "HashTableParams.hpp"
@@ -33,6 +34,8 @@ namespace kvs
         MGMutex m_storageLock;
         std::unique_ptr<HashTable::BucketManager> m_bucketManager;
         std::unique_ptr<HashTable> m_values;
+        std::mutex m_expiredKeysMutex;
+        std::unordered_set<std::string> m_expiredKeys;
 
         static void serialize(const std::string& key, const Record& value, Buffer& buffer);
         static void deserialize(Buffer& buffer, std::string& key, Record& value);

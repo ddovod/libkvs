@@ -1,6 +1,7 @@
 
 #include "LinearHashStorage.hpp"
 #include <memory>
+#include <mutex>
 #include <vector>
 #include "Record.hpp"
 #include "ValueType.hpp"
@@ -40,7 +41,8 @@ namespace kvs
         }
 
         if (record.getExpirationTimestampMs() < getTimestampMs()) {
-            m_values->remove(key.getKey(), record);
+            std::lock_guard<std::mutex> expLock{m_expiredKeysMutex};
+            m_expiredKeys.insert(key.getKey());
             return Status{Status::FailReason::kKeyNotFound};
         }
 
@@ -50,10 +52,21 @@ namespace kvs
 
     Status LinearHashStorage::putValue(const Key& key, const Value& value)
     {
-        MGLockGuard lock{m_storageLock, LockType::kX};
+        {
+            MGLockGuard lock{m_storageLock, LockType::kX};
 
-        m_values->insert(key.getKey(),
-            Record{value.getType(), value.getRawValue(), getTimestampMs(), std::numeric_limits<int64_t>::max()});
+            m_values->insert(key.getKey(),
+                Record{value.getType(), value.getRawValue(), getTimestampMs(), key.getExpirationTimestampMs()});
+        }
+
+        {
+            std::lock_guard<std::mutex> expLock{m_expiredKeysMutex};
+            for (const auto& k : m_expiredKeys) {
+                Record rec;
+                m_values->remove(k, rec);
+            }
+        }
+
         return {};
     }
 
