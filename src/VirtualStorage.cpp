@@ -8,9 +8,8 @@
 #include "IStorageRegistry.hpp"
 #include "Status.hpp"
 #include "linear_hashing/LinearHashStorageRegistry.hpp"
+#include "utility/MGLockGuard.hpp"
 #include "utility/StringUtils.hpp"
-
-#include <iostream>
 
 namespace kvs
 {
@@ -21,6 +20,8 @@ namespace kvs
 
     MountResult VirtualStorage::mount(const MountOptions& mountOptions)
     {
+        MGLockGuard lock{m_rootNode.nodeLock, LockType::kX};
+
         StorageAcquisitionOptions acquireOptions;
         acquireOptions.volumeFilePath = mountOptions.volumeFilePath;
         acquireOptions.volumePath = mountOptions.volumePath;
@@ -87,6 +88,8 @@ namespace kvs
 
     UnmountResult VirtualStorage::unmount(const UnmountOptions& unmountOptions)
     {
+        MGLockGuard lock{m_rootNode.nodeLock, LockType::kX};
+
         auto foundNode = m_mountPoints.find(unmountOptions.mountId);
         if (foundNode == m_mountPoints.end()) {
             return UnmountResult(UnmountResult::Status::kInvalidMountId);
@@ -126,7 +129,9 @@ namespace kvs
 
     Status VirtualStorage::getValue(const Key& key, Value* value)
     {
-        if (auto node = resolveNode(key.getPath()); node && !node->storages.empty()) {
+        MGMultiLockGuard locks;
+
+        if (auto node = resolveNode(key.getPath(), locks, LockType::kIS); node && !node->storages.empty()) {
             for (const auto& storage : node->storages) {
                 auto status = storage.storage->getValue(key, value);
                 if (status.isOk()) {
@@ -140,7 +145,9 @@ namespace kvs
 
     Status VirtualStorage::putValue(const Key& key, const Value& value)
     {
-        if (auto node = resolveNode(key.getPath()); node && !node->storages.empty()) {
+        MGMultiLockGuard locks;
+
+        if (auto node = resolveNode(key.getPath(), locks, LockType::kIX); node && !node->storages.empty()) {
             return node->storages.front().storage->putValue(key, value);
         }
         return Status{Status::FailReason::kNodeNotFound};
@@ -148,7 +155,9 @@ namespace kvs
 
     Status VirtualStorage::deleteValue(const Key& key)
     {
-        auto node = resolveNode(key.getPath());
+        MGMultiLockGuard locks;
+
+        auto node = resolveNode(key.getPath(), locks, LockType::kIX);
         if (!node || node->storages.empty()) {
             return Status{Status::FailReason::kNodeNotFound};
         }
@@ -163,8 +172,9 @@ namespace kvs
         return Status{Status::FailReason::kKeyNotFound};
     }
 
-    VirtualStorage::Node* VirtualStorage::resolveNode(const std::string& path)
+    VirtualStorage::Node* VirtualStorage::resolveNode(const std::string& path, MGMultiLockGuard& locks, LockType type)
     {
+        locks.addLock(m_rootNode.nodeLock, type);
         Node* node = &m_rootNode;
         for (const auto& comp : split(path, "/")) {
             auto found = node->children.find(comp);
@@ -172,6 +182,7 @@ namespace kvs
                 return {};
             }
             node = found->second.get();
+            locks.addLock(node->nodeLock, type);
         }
         return node;
     }

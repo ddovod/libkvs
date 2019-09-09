@@ -8,6 +8,7 @@
 #include "IStorage.hpp"
 #include "IStorageRegistry.hpp"
 #include "StorageNode.hpp"
+#include "utility/MGLockGuard.hpp"
 
 namespace kvs
 {
@@ -32,6 +33,7 @@ namespace kvs
 
         struct Node
         {
+            MGMutex nodeLock;
             std::unordered_map<uint64_t, StorageNode> mountPoints;
             std::vector<MountedStorage> storages;
             std::unordered_map<std::string, std::unique_ptr<Node>> children;
@@ -42,7 +44,7 @@ namespace kvs
         uint64_t m_mountIdCounter = 1;
         std::unordered_map<uint64_t, Node*> m_mountPoints;
 
-        Node* resolveNode(const std::string& path);
+        Node* resolveNode(const std::string& path, MGMultiLockGuard& locks, LockType type);
         void mount(Node& node, StorageNode& storageNode, int priority);
         void unmount(Node& node, StorageNode& storageNode);
     };

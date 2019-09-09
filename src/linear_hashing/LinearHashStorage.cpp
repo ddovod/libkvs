@@ -6,6 +6,7 @@
 #include "ValueType.hpp"
 #include "buffer.h"
 #include "linear_hashing_table.h"
+#include "utility/MGLockGuard.hpp"
 #include "utility/TimeUtils.hpp"
 
 namespace kvs
@@ -30,6 +31,8 @@ namespace kvs
 
     Status LinearHashStorage::getValue(const Key& key, Value* value)
     {
+        MGLockGuard lock{m_storageLock, LockType::kS};
+
         Record record;
         auto found = m_values->find(key.getKey(), record);
         if (!found) {
@@ -47,6 +50,8 @@ namespace kvs
 
     Status LinearHashStorage::putValue(const Key& key, const Value& value)
     {
+        MGLockGuard lock{m_storageLock, LockType::kX};
+
         m_values->insert(key.getKey(),
             Record{value.getType(), value.getRawValue(), getTimestampMs(), std::numeric_limits<int64_t>::max()});
         return {};
@@ -54,6 +59,8 @@ namespace kvs
 
     Status LinearHashStorage::deleteValue(const Key& key)
     {
+        MGLockGuard lock{m_storageLock, LockType::kX};
+
         Record record;
         auto found = m_values->find(key.getKey(), record);
         if (!found) {
