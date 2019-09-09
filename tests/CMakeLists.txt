@@ -11,13 +11,16 @@ target_sources(kvs-tests PRIVATE
   src/BasicOperations_test.cpp
   src/LinearHashStorageRegistry_test.cpp
   src/MountingNodes_test.cpp
+  src/SimpleMultiThreaded_test.cpp
   )
 target_include_directories(kvs-tests PRIVATE
   src
   ../libs/doctest
   )
+find_package(Threads REQUIRED)
 target_link_libraries(kvs-tests PRIVATE
   libkvs
+  Threads::Threads
   )
 set_target_properties(kvs-tests PROPERTIES
   CXX_STANDARD 17
