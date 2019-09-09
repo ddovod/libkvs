@@ -36,6 +36,7 @@ target_sources(libkvs PRIVATE
   src/utility/TimeUtils.cpp
   src/utility/StringUtils.cpp
   src/utility/FilesystemUtils.cpp
+  src/utility/MGMutex.cpp
   )
 target_include_directories(libkvs PUBLIC
   src
