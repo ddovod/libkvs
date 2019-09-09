@@ -24,7 +24,7 @@ namespace
         auto i2 = static_cast<size_t>(lockType2);
         assert(i1 < 6);
         assert(i2 < 6);
-        return compatibilityMatrix[i1][i2];
+        return compatibilityMatrix[i1][i2];  // NOLINT
     }
 }
 
@@ -57,10 +57,9 @@ namespace kvs
                 if (quit) {
                     lock.unlock();
                     break;
-                } else {
-                    lock.unlock();
-                    std::this_thread::yield();
                 }
+                lock.unlock();
+                std::this_thread::yield();
             }
         }
     }
