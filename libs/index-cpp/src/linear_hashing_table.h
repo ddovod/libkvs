@@ -24,6 +24,7 @@
 #include <array>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <stdexcept>
 #include <tuple>
 #include <vector>
@@ -448,6 +449,7 @@ public:
     }
 
     virtual void discard(Bucket* bucket) override {
+      std::lock_guard<std::recursive_mutex> mut_lock{mutex_};
       loaded_.erase(bucket);
       if (bucket->is_overflow()) {
         overflow_bucket_status_.unset(bucket->index());
@@ -457,6 +459,7 @@ public:
     // Flush all dirty buckets to file and unload all buckets from the cache that are not locked for
     // flush.
     virtual void flush() override {
+      std::lock_guard<std::recursive_mutex> mut_lock{mutex_};
       bool changes_flushed = false;
       for (auto i = loaded_.begin(); i != loaded_.end();) {
         Bucket* bucket = *i;
@@ -498,6 +501,7 @@ public:
 
     // Reads the table metadata from the primary storage file.
     virtual void initialize() override {
+      std::lock_guard<std::recursive_mutex> mut_lock{mutex_};
       if (fseek(primary_file_, 0, SEEK_END) != 0) {
         throw std::runtime_error("seek error");
       }
@@ -537,6 +541,7 @@ public:
 
     virtual void load(Bucket* bucket, std::vector<RecordType>& records,
                       std::unique_ptr<Bucket>& overflow) override {
+      std::lock_guard<std::recursive_mutex> mut_lock{mutex_};
       if (!loaded_.insert(bucket).second) {
         return;
       }
@@ -571,6 +576,7 @@ public:
     }
 
     virtual Bucket* new_overflow_bucket() override {
+      std::lock_guard<std::recursive_mutex> mut_lock{mutex_};
       size_t i = 0;
       const std::vector<uint8_t>& bytes = overflow_bucket_status_.bytes();
       for (size_t j = 0; j < bytes.size() && bytes[j] == 0xff; ++j) i += 8;
@@ -595,6 +601,7 @@ public:
     }
 
     virtual Bucket* new_primary_bucket(size_t index) override {
+      std::lock_guard<std::recursive_mutex> mut_lock{mutex_};
       Bucket* bucket = new Bucket(this, index, false, true);
       loaded_.insert(bucket);
       if (loaded_.size() > bucket_cache_size_) {
@@ -605,6 +612,7 @@ public:
     }
 
     virtual Bucket* unloaded_bucket(size_t index, bool is_overflow) override {
+      std::lock_guard<std::recursive_mutex> mut_lock{mutex_};
       return new Bucket(this, index, is_overflow, false);
     }
 
@@ -630,6 +638,7 @@ public:
 
     // Flush the table metadata to the primary storage file.
     void flush_table_metadata() {
+      std::lock_guard<std::recursive_mutex> mut_lock{mutex_};
       // Crop unused overflow buckets.
       size_t overflow_bucket_count;
       for (overflow_bucket_count = overflow_bucket_status_.size();
@@ -682,6 +691,7 @@ public:
     size_t bucket_cache_size_;
     Bitarray overflow_bucket_status_;
     std::unordered_set<Bucket*> loaded_;
+    std::recursive_mutex mutex_;
 
     FILE* primary_file_;
     FILE* overflow_file_;
