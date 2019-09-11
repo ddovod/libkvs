@@ -8,6 +8,7 @@
 #include "buffer.h"
 #include "linear_hashing_table.h"
 #include "utility/MGLockGuard.hpp"
+#include "utility/MGMutex.hpp"
 #include "utility/TimeUtils.hpp"
 
 namespace kvs
@@ -85,6 +86,15 @@ namespace kvs
         return {};
     }
 
+    Status LinearHashStorage::getKeysRange(const Keys& keys, KeysRange* keysRange)
+    {
+        MGLockGuard lock{m_storageLock, LockType::kS};
+
+        auto result = m_values->getKeysRange(keys.getIndexFrom(), keys.getKeysCount());
+        *keysRange = KeysRange{std::move(result)};
+        return {};
+    }
+
     void LinearHashStorage::serialize(const std::string& key, const Record& value, Buffer& buffer)
     {
         buffer.put_uint64(key.size());
@@ -112,4 +122,6 @@ namespace kvs
         buffer.get_bytes(rawValue.data(), valueSize);
         value = Record(valueType, rawValue, creationTime, expirationTime);
     }
+
+    size_t LinearHashStorage::getSize() const { return m_values->size(); }
 }

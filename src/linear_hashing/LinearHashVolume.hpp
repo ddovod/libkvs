@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include "HashTableParams.hpp"
-#include "IStorage.hpp"
+#include "IStorageImpl.hpp"
 #include "IVolume.hpp"
 #include "Node.hpp"
 #include "StorageNode.hpp"
@@ -26,7 +26,7 @@ namespace kvs
         struct TreeNode
         {
             Node node;
-            std::unique_ptr<IStorage> storage;
+            std::unique_ptr<IStorageImpl> storage;
             std::unordered_map<std::string, std::unique_ptr<TreeNode>> children;
         };
 

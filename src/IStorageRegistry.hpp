@@ -4,7 +4,7 @@
 #include <cassert>
 #include <memory>
 #include "HashTableParams.hpp"
-#include "IStorage.hpp"
+#include "IStorageImpl.hpp"
 #include "StorageNode.hpp"
 
 namespace kvs
@@ -48,7 +48,7 @@ namespace kvs
 
     struct StorageReleaseOptions
     {
-        IStorage* storage = nullptr;
+        IStorageImpl* storage = nullptr;
     };
 
     class StorageReleaseResult

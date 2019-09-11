@@ -4,13 +4,13 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include "IStorage.hpp"
+#include "IStorageImpl.hpp"
 
 namespace kvs
 {
     struct StorageNode
     {
-        IStorage* storage = nullptr;
+        IStorageImpl* storage = nullptr;
         std::unordered_map<std::string, std::unique_ptr<StorageNode>> children;
     };
 }

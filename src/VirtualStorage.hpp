@@ -5,8 +5,9 @@
 #include <unordered_map>
 #include <bits/stdint-uintn.h>
 #include "ICompositeStorage.hpp"
-#include "IStorage.hpp"
+#include "IStorageImpl.hpp"
 #include "IStorageRegistry.hpp"
+#include "KeysRange.hpp"
 #include "StorageNode.hpp"
 #include "utility/MGLockGuard.hpp"
 
@@ -23,11 +24,12 @@ namespace kvs
         Status getValue(const Key& key, Value* value) override;
         Status putValue(const Key& key, const Value& value) override;
         Status deleteValue(const Key& key) override;
+        Status getKeysRange(const Keys& keys, KeysRange* keysRange) override;
 
     private:
         struct MountedStorage
         {
-            IStorage* storage = nullptr;
+            IStorageImpl* storage = nullptr;
             int priority = 0;
         };
 

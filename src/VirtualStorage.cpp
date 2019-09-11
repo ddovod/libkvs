@@ -129,8 +129,9 @@ namespace kvs
 
     Status VirtualStorage::getValue(const Key& key, Value* value)
     {
-        MGMultiLockGuard locks;
+        assert(value != nullptr);
 
+        MGMultiLockGuard locks;
         if (auto node = resolveNode(key.getPath(), locks, LockType::kIS); node && !node->storages.empty()) {
             for (const auto& storage : node->storages) {
                 auto status = storage.storage->getValue(key, value);
@@ -146,7 +147,6 @@ namespace kvs
     Status VirtualStorage::putValue(const Key& key, const Value& value)
     {
         MGMultiLockGuard locks;
-
         if (auto node = resolveNode(key.getPath(), locks, LockType::kIX); node && !node->storages.empty()) {
             return node->storages.front().storage->putValue(key, value);
         }
@@ -156,7 +156,6 @@ namespace kvs
     Status VirtualStorage::deleteValue(const Key& key)
     {
         MGMultiLockGuard locks;
-
         auto node = resolveNode(key.getPath(), locks, LockType::kIX);
         if (!node || node->storages.empty()) {
             return Status{Status::FailReason::kNodeNotFound};
@@ -170,6 +169,63 @@ namespace kvs
         }
 
         return Status{Status::FailReason::kKeyNotFound};
+    }
+
+    Status VirtualStorage::getKeysRange(const Keys& keys, KeysRange* keysRange)
+    {
+        assert(keysRange != nullptr);
+
+        MGMultiLockGuard locks;
+        auto node = resolveNode(keys.getPath(), locks, LockType::kIS);
+        if (!node || node->storages.empty()) {
+            return Status{Status::FailReason::kNodeNotFound};
+        }
+
+        std::unordered_set<std::string> excludeKeys;
+        auto indicesToSkip = keys.getIndexFrom();
+        size_t storageIndex = 0;
+        size_t storageKeyIndex = 0;
+        KeysRange storageKeys;
+        while (indicesToSkip > 0 && storageIndex < node->storages.size()) {
+            auto storage = node->storages[storageIndex].storage;
+            size_t keysToRead = std::min(indicesToSkip, storage->getSize() - storageKeyIndex);
+            storage->getKeysRange({"", storageKeyIndex, keysToRead}, &storageKeys);
+            for (const auto& k : storageKeys.getKeys()) {
+                excludeKeys.insert(k);
+            }
+            storageKeyIndex += keysToRead;
+            indicesToSkip -= storageKeys.getKeys().size();
+            if (storageKeyIndex >= storage->getSize()) {
+                storageIndex++;
+                storageKeyIndex = 0;
+            }
+        }
+
+        auto keysLeft = keys.getKeysCount();
+        std::vector<std::string> resultKeys;
+        resultKeys.reserve(keysLeft);
+        while (keysLeft > 0 && storageIndex < node->storages.size()) {
+            auto storage = node->storages[storageIndex].storage;
+            size_t keysToRead = std::min(keysLeft, storage->getSize() - storageKeyIndex);
+            storage->getKeysRange({"", storageKeyIndex, keysToRead}, &storageKeys);
+            size_t addedToReault = 0;
+            for (const auto& k : storageKeys.getKeys()) {
+                if (excludeKeys.find(k) == excludeKeys.end()) {
+                    resultKeys.push_back(k);
+                    addedToReault++;
+                    excludeKeys.insert(k);
+                }
+            }
+            storageKeyIndex += keysToRead;
+            keysLeft -= addedToReault;
+            if (storageKeyIndex >= storage->getSize()) {
+                storageIndex++;
+                storageKeyIndex = 0;
+            }
+        }
+
+        *keysRange = KeysRange{std::move(resultKeys)};
+        return Status{Status::FailReason::kOk};
     }
 
     VirtualStorage::Node* VirtualStorage::resolveNode(const std::string& path, MGMultiLockGuard& locks, LockType type)
