@@ -771,6 +771,41 @@ public:
     return metadata_.size;
   }
 
+  std::vector<KeyType> getKeysRange(size_t index_from, size_t keys_count) {
+    size_t iBucket = 0;
+    size_t iRecord = 0;
+    while (index_from > 0 && iBucket < bucket_chains_.size()) {
+      Bucket* bucket = bucket_chains_[iBucket].get();
+      if (bucket->size() > index_from) {
+        iRecord = bucket->size() - index_from;
+        index_from = 0;
+      } else {
+        index_from -= bucket->size();
+        iBucket++;
+      }
+    }
+
+    std::vector<KeyType> result;
+    result.reserve(keys_count);
+    while (keys_count > 0 && iBucket < bucket_chains_.size()) {
+      Bucket* bucket = bucket_chains_[iBucket].get();
+      const auto& data = bucket->data();
+      for (; iRecord < data.size(); iRecord++) {
+        result.push_back(data[iRecord].first);
+        keys_count--;
+        if (keys_count == 0) {
+          break;
+        }
+      }
+      if (iRecord == data.size()) {
+        iBucket++;
+        iRecord = 0;
+      }
+    }
+
+    return result;
+  }
+
 private:
   BucketManager* bucket_manager_;
   HashEvaluator hash_;
