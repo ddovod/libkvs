@@ -61,7 +61,7 @@ The database granularity levels are:
 
 
 For mount/unmount operations the virtual storage is locked in X mode so nobody can do anything until mount/unmount is finished.
-For get/put/delete operations the virtual storage and its' nodes are locked in IS mode for get and in IX mode for put and delete operations. Entire hash table is locked in S mode for get and in X mode for put and delete operations since this is a destination point of the keys and values.
+For get/put/delete operations the virtual storage and its' nodes are locked in IS mode for get and in IX mode for put and delete operations. A volume node (hash table) is locked in S mode for get and in X mode for put and delete operations since this is a destination point of the keys and values.
 
 
 There's a helper `MGMutex` class which implements a locking logic. There're 2 lists of thread infos:
@@ -77,6 +77,8 @@ If the threads' lock mode is not compatible with current lock mode, its' data is
 
 When the thread unlocks the mutex, it can move next N thread records from the waiting to the running list promoting them to continue.
 
+Current lock mode of the mutex is changed only when running list becomes empty. The new lock mode is assigned according to the next lock operation or first entry of the waiting list.
+
 This mechanism allows to minimise stagnation time of the waiting threads, so eventually everybody will be allowed to try to proceed.
 
 ## TODO
@@ -84,6 +86,7 @@ This mechanism allows to minimise stagnation time of the waiting threads, so eve
 - Finer grain locking granularity on the hash table level
 - Finer grain locking granularity for mount/unmount operations
 - More optimal file structure for the hash table
+- Ability to mount single nodes from the volumes instead of whole subtree
 - Logs
 - Profile
 - More tests
