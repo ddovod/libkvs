@@ -12,7 +12,7 @@ TEST_CASE("Basic LinearHashStorageRegistry")
     acquireOptions.volumePath = "A";
     acquireOptions.hashTableParams.maxRecordSizeBytes = 1024;
 
-    kvs::IStorage* storagePtr = nullptr;
+    kvs::IStorageImpl* storagePtr = nullptr;
     {
         auto acquireResult = registry.acquireStorage(acquireOptions);
         CHECK(acquireResult.isOk());

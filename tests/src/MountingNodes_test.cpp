@@ -4,7 +4,7 @@
 #include "ValueType.hpp"
 #include "VirtualStorage.hpp"
 
-TEST_CASE("Mount/unmount")
+TEST_CASE("Mount")
 {
     auto storage = std::make_unique<kvs::VirtualStorage>();
     kvs::MountOptions options;
