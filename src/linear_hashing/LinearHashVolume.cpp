@@ -53,6 +53,8 @@ namespace kvs
         assert(treeNode != nullptr);
 
         auto resultNode = std::make_unique<StorageNode>();
+        resultNode->volumeFilePath = m_filepath;
+        resultNode->nodePath = options.path;
         loadStorage(*resultNode, *treeNode, options.hashTableParams);
 
         saveNodes();
@@ -75,6 +77,8 @@ namespace kvs
         storageNode.storage = treeNode.storage.get();
         for (auto& child : treeNode.children) {
             auto childNode = std::make_unique<StorageNode>();
+            childNode->volumeFilePath = storageNode.volumeFilePath;
+            childNode->nodePath = storageNode.nodePath + "/" + child.first;
             loadStorage(*childNode, *child.second, hashTableParams);
             storageNode.children[child.first] = std::move(childNode);
         }

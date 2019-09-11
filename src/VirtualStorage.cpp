@@ -7,6 +7,7 @@
 #include "IStorage.hpp"
 #include "IStorageRegistry.hpp"
 #include "Status.hpp"
+#include "StorageNode.hpp"
 #include "linear_hashing/LinearHashStorageRegistry.hpp"
 #include "utility/MGLockGuard.hpp"
 #include "utility/StringUtils.hpp"
@@ -22,52 +23,44 @@ namespace kvs
     {
         MGLockGuard lock{m_rootNode.nodeLock, LockType::kX};
 
+        // Loading volume subtree
         StorageAcquisitionOptions acquireOptions;
         acquireOptions.volumeFilePath = mountOptions.volumeFilePath;
-        acquireOptions.volumePath = mountOptions.volumePath;
+        acquireOptions.nodePath = mountOptions.nodePath;
         acquireOptions.hashTableParams = mountOptions.hashTableParams;
-        auto result = m_storageRegistry->acquireStorage(acquireOptions);
-        if (!result.isOk()) {
-            MountResult::Status resultStatus = MountResult::Status::kOk;
-            switch (result.getStatus()) {
-                case StorageAcquisitionResult::Status::kVolumeLoadError:
-                    resultStatus = MountResult::Status::kVolumeLoadError;
-                    break;
-                case StorageAcquisitionResult::Status::kStorageLoadError:
-                    resultStatus = MountResult::Status::kStorageLoadError;
-                    break;
-                case StorageAcquisitionResult::Status::kOk: break;
-            }
-            return MountResult{resultStatus, 0};
+        auto acquireResult = m_storageRegistry->acquireStorage(acquireOptions);
+        if (!acquireResult.isOk()) {
+            return createMountResult(acquireResult);
+        }
+        auto storageNode = std::move(acquireResult.getRoot());
+
+        // Re-mounting nodes to the previously mounted points if there're new nodes found
+        auto remountResult = remountNodes(mountOptions);
+        if (!remountResult.isOk()) {
+            return remountResult;
         }
 
-        auto storageNode = std::move(result.getRoot());
+        // Creating virtual structure to the mount point
+        Node* node = createNodesForPath(mountOptions.storageMountPath);
 
-        Node* node = &m_rootNode;
-        for (const auto& comp : split(mountOptions.storageMountPath, "/")) {
-            auto found = node->children.find(comp);
-            if (found == node->children.end()) {
-                auto newNode = std::make_unique<Node>();
-                auto newNodePtr = newNode.get();
-                node->children[comp] = std::move(newNode);
-                node = newNodePtr;
-            } else {
-                node = found->second.get();
-            }
-        }
-
-        assert(node != nullptr);
-
+        // Mounting volume nodes to the virtual nodes
         auto mountId = m_mountIdCounter++;
-        mount(*node, storageNode, mountOptions.priority);
-        node->mountPoints[mountId] = std::move(storageNode);
+        mount(*node, *storageNode, mountOptions.priority);
         m_mountPoints[mountId] = node;
-
+        m_volumesToNodeMountPointsMap[mountOptions.volumeFilePath].push_back(node);
+        MountPoint mountPoint;
+        mountPoint.storageNode = std::move(storageNode);
+        mountPoint.priority = mountOptions.priority;
+        mountPoint.remountOptions.node = node;
+        mountPoint.remountOptions.mountId = mountId;
+        mountPoint.remountOptions.mountOptions = mountOptions;
+        node->mountPoints[mountId] = std::move(mountPoint);
         return MountResult{MountResult::Status::kOk, mountId};
     }
 
     void VirtualStorage::mount(Node& node, StorageNode& storageNode, int priority)
     {
+        // Mounting node at the end of the same priority group preserving priorities in descending order
         MountedStorage newStorage;
         newStorage.storage = storageNode.storage;
         newStorage.priority = priority;
@@ -98,7 +91,7 @@ namespace kvs
         auto foundStorageNode = foundNode->second->mountPoints.find(unmountOptions.mountId);
         assert(foundStorageNode != foundNode->second->mountPoints.end());
 
-        unmount(*foundNode->second, foundStorageNode->second);
+        unmount(*foundNode->second, *foundStorageNode->second.storageNode);
 
         foundNode->second->mountPoints.erase(foundStorageNode);
         m_mountPoints.erase(foundNode);
@@ -181,6 +174,7 @@ namespace kvs
             return Status{Status::FailReason::kNodeNotFound};
         }
 
+        // Skipping first `getIndexFrom` keys
         std::unordered_set<std::string> excludeKeys;
         auto indicesToSkip = keys.getIndexFrom();
         size_t storageIndex = 0;
@@ -201,6 +195,7 @@ namespace kvs
             }
         }
 
+        // Collecting up to `getKeysCount` keys starting from the current position
         auto keysLeft = keys.getKeysCount();
         std::vector<std::string> resultKeys;
         resultKeys.reserve(keysLeft);
@@ -241,5 +236,87 @@ namespace kvs
             locks.addLock(node->nodeLock, type);
         }
         return node;
+    }
+
+    VirtualStorage::Node* VirtualStorage::createNodesForPath(const std::string& path)
+    {
+        Node* node = &m_rootNode;
+        for (const auto& comp : split(path, "/")) {
+            auto found = node->children.find(comp);
+            if (found == node->children.end()) {
+                auto newNode = std::make_unique<Node>();
+                auto newNodePtr = newNode.get();
+                node->children[comp] = std::move(newNode);
+                node = newNodePtr;
+            } else {
+                node = found->second.get();
+            }
+        }
+        assert(node != nullptr);
+
+        return node;
+    }
+
+    MountResult VirtualStorage::remountNodes(const MountOptions& mountOptions)
+    {
+        auto found = m_volumesToNodeMountPointsMap.find(mountOptions.volumeFilePath);
+        if (found != m_volumesToNodeMountPointsMap.end()) {
+            std::vector<RemountOptions> remountEntries;
+            auto nodesCopy = found->second;
+            for (auto foundNode : nodesCopy) {
+                for (auto& mountPointPair : foundNode->mountPoints) {
+                    auto& mountedStorageNode = mountPointPair.second.storageNode;
+                    if (mountedStorageNode->volumeFilePath != mountOptions.volumeFilePath) {
+                        // Another volume
+                        continue;
+                    }
+                    if (!startsWith(mountOptions.nodePath, mountedStorageNode->nodePath)) {
+                        // Not a subtree
+                        continue;
+                    }
+                    if (mountOptions.nodePath == mountedStorageNode->nodePath) {
+                        // Exactly the same structure
+                        continue;
+                    }
+                    remountEntries.push_back(mountPointPair.second.remountOptions);
+                }
+            }
+
+            for (const auto& remountOptions : remountEntries) {
+                auto& oldNode = remountOptions.node;
+                auto& oldMountPoint = remountOptions.node->mountPoints[remountOptions.mountId];
+                assert(oldMountPoint.storageNode != nullptr);
+                unmount(*oldNode, *oldMountPoint.storageNode);
+
+                StorageAcquisitionOptions acquireOptions;
+                acquireOptions.volumeFilePath = remountOptions.mountOptions.volumeFilePath;
+                acquireOptions.nodePath = remountOptions.mountOptions.nodePath;
+                acquireOptions.hashTableParams = remountOptions.mountOptions.hashTableParams;
+                auto acquireResult = m_storageRegistry->acquireStorage(acquireOptions);
+                assert(acquireResult.isOk());
+                if (!acquireResult.isOk()) {
+                    return createMountResult(acquireResult);
+                }
+                oldMountPoint.storageNode = std::move(acquireResult.getRoot());
+                mount(*oldNode, *oldMountPoint.storageNode, remountOptions.mountOptions.priority);
+            }
+        }
+
+        return MountResult{MountResult::Status::kOk, 0};
+    }
+
+    MountResult VirtualStorage::createMountResult(const StorageAcquisitionResult& acquireResult)
+    {
+        MountResult::Status resultStatus = MountResult::Status::kOk;
+        switch (acquireResult.getStatus()) {
+            case StorageAcquisitionResult::Status::kVolumeLoadError:
+                resultStatus = MountResult::Status::kVolumeLoadError;
+                break;
+            case StorageAcquisitionResult::Status::kStorageLoadError:
+                resultStatus = MountResult::Status::kStorageLoadError;
+                break;
+            case StorageAcquisitionResult::Status::kOk: break;
+        }
+        return MountResult{resultStatus, 0};
     }
 }
