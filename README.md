@@ -80,7 +80,8 @@ When the thread unlocks the mutex, it can move next N thread records from the wa
 This mechanism allows to minimise stagnation time of the waiting threads, so eventually everybody will be allowed to try to proceed.
 
 ## TODO
-- Better locking granularity on the hash table level
+- Optimise `getKeysRange` implementation
+- Finer grain locking granularity on the hash table level
 - Finer grain locking granularity for mount/unmount operations
 - More optimal file structure for the hash table
 - Logs
