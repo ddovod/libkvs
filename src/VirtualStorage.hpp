@@ -12,7 +12,7 @@
 
 namespace kvs
 {
-    class VirtualStorage : public ICompositeStorage, public IStorage
+    class VirtualStorage : public ICompositeStorage
     {
     public:
         VirtualStorage();

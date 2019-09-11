@@ -67,7 +67,7 @@ namespace kvs
         Status m_status = Status::kOk;
     };
 
-    class ICompositeStorage
+    class ICompositeStorage : public IStorage
     {
     public:
         virtual ~ICompositeStorage() = default;
