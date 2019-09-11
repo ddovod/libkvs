@@ -20,6 +20,7 @@ TEST_CASE("Simple multithreaded operations test")
         options.storageMountPath = "A";
         options.volumePath = "A";
         options.hashTableParams.maxRecordSizeBytes = 1024;
+        options.hashTableParams.bucketCacheSizeBytes = 1024 * 1024;
         storage->mount(options);
 
         options.storageMountPath = "A/B";
