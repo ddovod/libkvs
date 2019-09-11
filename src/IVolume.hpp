@@ -21,18 +21,18 @@ namespace kvs
             kOk,
         };
 
-        LoadStorageResult(Status status, StorageNode root)
+        LoadStorageResult(Status status, std::unique_ptr<StorageNode>&& root)
             : m_status(status)
             , m_root(std::move(root))
         {
         }
 
         bool isOk() const { return m_status == Status::kOk; }
-        StorageNode& getRoot() { return m_root; }
+        std::unique_ptr<StorageNode>& getRoot() { return m_root; }
 
     private:
         Status m_status = Status::kOk;
-        StorageNode m_root;
+        std::unique_ptr<StorageNode> m_root;
     };
 
     struct UnloadStorageOptions

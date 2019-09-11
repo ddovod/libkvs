@@ -12,7 +12,7 @@ namespace kvs
     {
         std::string storageMountPath;
         std::string volumeFilePath;
-        std::string volumePath;
+        std::string nodePath;
         int priority = 0;
         HashTableParams hashTableParams;
     };

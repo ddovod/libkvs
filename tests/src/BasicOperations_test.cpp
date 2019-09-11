@@ -13,7 +13,7 @@ TEST_CASE("Basic get/put")
     kvs::MountOptions options;
     options.storageMountPath = "A";
     options.volumeFilePath = "test_data/basic_volume.json";
-    options.volumePath = "K";
+    options.nodePath = "K";
     options.hashTableParams.maxRecordSizeBytes = 1024;
     auto result = storage->mount(options);
     CHECK(result.isOk());

@@ -15,7 +15,7 @@ TEST_CASE("Read/write performance basic")
     kvs::MountOptions options;
     options.storageMountPath = "A";
     options.volumeFilePath = "test_data/read_write_basic.json";
-    options.volumePath = "P";
+    options.nodePath = "P";
     options.hashTableParams.maxRecordSizeBytes = 1024;
     auto result = storage->mount(options);
     CHECK(result.isOk());

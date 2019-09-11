@@ -9,7 +9,7 @@ TEST_CASE("Basic LinearHashStorageRegistry")
     kvs::LinearHashStorageRegistry registry;
     kvs::StorageAcquisitionOptions acquireOptions;
     acquireOptions.volumeFilePath = "test_data/linear_hash_volume.json";
-    acquireOptions.volumePath = "A";
+    acquireOptions.nodePath = "A";
     acquireOptions.hashTableParams.maxRecordSizeBytes = 1024;
 
     kvs::IStorageImpl* storagePtr = nullptr;

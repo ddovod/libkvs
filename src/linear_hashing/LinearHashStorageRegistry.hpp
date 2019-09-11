@@ -23,6 +23,6 @@ namespace kvs
         std::unordered_map<std::string, std::pair<IStorage*, int>> m_storageCounters;
         std::unordered_map<IStorage*, std::string> m_storageKeys;
 
-        void acquireStorage(StorageNode& storageNode, const std::string& volumeFilepath, const std::string& volumePath);
+        void acquireStorage(StorageNode& storageNode, const std::string& volumeFilepath, const std::string& nodePath);
     };
 }

@@ -18,18 +18,18 @@ TEST_CASE("Simple multithreaded operations test")
         kvs::MountOptions options;
         options.volumeFilePath = "test_data/mt_volume_" + std::to_string(i) + ".json";
         options.storageMountPath = "A";
-        options.volumePath = "A";
+        options.nodePath = "A";
         options.hashTableParams.maxRecordSizeBytes = 1024;
         options.hashTableParams.bucketCacheSizeBytes = 1024 * 1024;
         storage->mount(options);
 
         options.storageMountPath = "A/B";
-        options.volumePath = "C/D";
+        options.nodePath = "C/D";
         options.hashTableParams.maxRecordSizeBytes = 1024;
         storage->mount(options);
 
         options.storageMountPath = "A/B/C";
-        options.volumePath = "E/F/G";
+        options.nodePath = "E/F/G";
         options.hashTableParams.maxRecordSizeBytes = 1024;
         storage->mount(options);
 

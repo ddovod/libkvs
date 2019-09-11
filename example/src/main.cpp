@@ -13,7 +13,7 @@ int main()
         kvs::MountOptions options;
         options.storageMountPath = "A/B";
         options.volumeFilePath = "volume1.kvs";
-        options.volumePath = "K/L";
+        options.nodePath = "K/L";
         auto result = storage->mount(options);
         if (!result.isOk()) {
             std::abort();
@@ -24,7 +24,7 @@ int main()
         kvs::MountOptions options;
         options.storageMountPath = "A/B/C";
         options.volumeFilePath = "volume2.kvs";
-        options.volumePath = "P/C/R";
+        options.nodePath = "P/C/R";
         auto result = storage->mount(options);
         if (!result.isOk()) {
             std::abort();

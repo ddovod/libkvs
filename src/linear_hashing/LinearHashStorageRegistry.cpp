@@ -21,14 +21,14 @@ namespace kvs
         }
 
         LoadStorageOptions loadOptions;
-        loadOptions.path = options.volumePath;
+        loadOptions.path = options.nodePath;
         loadOptions.hashTableParams = options.hashTableParams;
         auto loadResult = found->second->loadStorage(loadOptions);
         if (!loadResult.isOk()) {
             return StorageAcquisitionResult{{}, StorageAcquisitionResult::Status::kStorageLoadError};
         }
 
-        acquireStorage(loadResult.getRoot(), options.volumeFilePath, options.volumePath);
+        acquireStorage(*loadResult.getRoot(), options.volumeFilePath, options.nodePath);
 
         return StorageAcquisitionResult{std::move(loadResult.getRoot()), StorageAcquisitionResult::Status::kOk};
     }
@@ -56,9 +56,9 @@ namespace kvs
 
     void LinearHashStorageRegistry::acquireStorage(StorageNode& storageNode,
         const std::string& volumeFilepath,
-        const std::string& volumePath)
+        const std::string& nodePath)
     {
-        const auto key = volumeFilepath + ":" + volumePath;
+        const auto key = volumeFilepath + ":" + nodePath;
         auto found = m_storageCounters.find(key);
         if (found == m_storageCounters.end()) {
             found = m_storageCounters.emplace(key, std::make_pair(storageNode.storage, 0)).first;
@@ -67,7 +67,7 @@ namespace kvs
         found->second.second++;
 
         for (auto& child : storageNode.children) {
-            acquireStorage(*child.second, volumeFilepath, volumePath + "/" + child.first);
+            acquireStorage(*child.second, volumeFilepath, nodePath + "/" + child.first);
         }
     }
 }

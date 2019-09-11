@@ -12,7 +12,7 @@ namespace kvs
     struct StorageAcquisitionOptions
     {
         std::string volumeFilePath;
-        std::string volumePath;
+        std::string nodePath;
         HashTableParams hashTableParams;
     };
 
@@ -26,11 +26,11 @@ namespace kvs
             kStorageLoadError,
         };
 
-        StorageAcquisitionResult(StorageNode root, Status status)
+        StorageAcquisitionResult(std::unique_ptr<StorageNode>&& root, Status status)
             : m_root(std::move(root))
             , m_status(status)
         {
-            if (m_root.storage == nullptr) {
+            if (m_root->storage == nullptr) {
                 assert(m_status != Status::kOk);
             } else {
                 assert(m_status == Status::kOk);
@@ -39,10 +39,10 @@ namespace kvs
 
         bool isOk() const { return m_status == Status::kOk; }
         Status getStatus() const { return m_status; }
-        StorageNode& getRoot() { return m_root; }
+        std::unique_ptr<StorageNode>& getRoot() { return m_root; }
 
     private:
-        StorageNode m_root;
+        std::unique_ptr<StorageNode> m_root;
         Status m_status = Status::kOk;
     };
 

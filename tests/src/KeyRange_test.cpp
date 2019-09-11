@@ -17,7 +17,7 @@ TEST_CASE("Key range query")
     options.volumeFilePath = "test_data/key_range_volume.json";
 
     options.storageMountPath = "A";
-    options.volumePath = "A";
+    options.nodePath = "A";
     auto result = storage->mount(options);
     CHECK(result.isOk());
 
@@ -48,12 +48,12 @@ TEST_CASE("Key range query")
     CHECK(keysSetA.size() == keysRange.getKeys().size());
 
     options.storageMountPath = "A";
-    options.volumePath = "B";
+    options.nodePath = "B";
     result = storage->mount(options);
     CHECK(result.isOk());
 
     options.storageMountPath = "B";
-    options.volumePath = "B";
+    options.nodePath = "B";
     result = storage->mount(options);
     CHECK(result.isOk());
 
@@ -96,13 +96,13 @@ TEST_CASE("Key range query")
     }
 
     options.storageMountPath = "A";
-    options.volumePath = "C";
+    options.nodePath = "C";
     options.priority = 1;
     result = storage->mount(options);
     CHECK(result.isOk());
 
     options.storageMountPath = "C";
-    options.volumePath = "C";
+    options.nodePath = "C";
     result = storage->mount(options);
     CHECK(result.isOk());
 

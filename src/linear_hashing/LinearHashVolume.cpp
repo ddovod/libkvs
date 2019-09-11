@@ -52,8 +52,8 @@ namespace kvs
         auto treeNode = findTreeNode(options.path);
         assert(treeNode != nullptr);
 
-        StorageNode resultNode;
-        loadStorage(resultNode, *treeNode, options.hashTableParams);
+        auto resultNode = std::make_unique<StorageNode>();
+        loadStorage(*resultNode, *treeNode, options.hashTableParams);
 
         saveNodes();
 
