@@ -14,6 +14,8 @@ namespace kvs
 {
     LinearHashStorage::LinearHashStorage(const LinearHashStorageParams& params)
     {
+        auto bucketCacheSize =
+            std::max(params.hashTableParams.bucketCacheSizeBytes, params.hashTableParams.maxRecordSizeBytes);
         m_bucketManager = std::make_unique<HashTable::FileBucketManager>(params.hashTableParams.bucketCapacity,
             params.hashTableParams.minBucketsCount,
             params.primaryFilepath.c_str(),
@@ -26,7 +28,7 @@ namespace kvs
 #else
             Buffer::Endian::LITTLE,
 #endif
-            params.hashTableParams.bucketCacheSizeBytes);
+            bucketCacheSize);
         m_values = std::make_unique<HashTable>(m_bucketManager.get());
     }
 
