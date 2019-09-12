@@ -31,6 +31,7 @@ namespace kvs
         Status deleteValue(const Key& key) override;
         Status getKeysRange(const Keys& keys, KeysRange* keysRange) override;
         size_t getSize() const override;
+        bool hasKey(const Key& key) const override;
 
     private:
         MGMutex m_storageLock;
@@ -41,5 +42,6 @@ namespace kvs
 
         static void serialize(const std::string& key, const Record& value, Buffer& buffer);
         static void deserialize(Buffer& buffer, std::string& key, Record& value);
+        void clearExpiredKeys();
     };
 }

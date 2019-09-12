@@ -9,5 +9,6 @@ namespace kvs
     {
     public:
         virtual size_t getSize() const = 0;
+        virtual bool hasKey(const Key& key) const = 0;
     };
 }

@@ -55,20 +55,16 @@ namespace kvs
 
     Status LinearHashStorage::putValue(const Key& key, const Value& value)
     {
-        {
-            MGLockGuard lock{m_storageLock, LockType::kX};
+        MGLockGuard lock{m_storageLock, LockType::kX};
+        clearExpiredKeys();
 
-            m_values->insert(key.getKey(),
-                Record{value.getType(), value.getRawValue(), getTimestampMs(), key.getExpirationTimestampMs()});
+        if (m_values->contains(key.getKey())) {
+            Record record;
+            m_values->remove(key.getKey(), record);
         }
 
-        {
-            std::lock_guard<std::mutex> expLock{m_expiredKeysMutex};
-            for (const auto& k : m_expiredKeys) {
-                Record rec;
-                m_values->remove(k, rec);
-            }
-        }
+        m_values->insert(key.getKey(),
+            Record{value.getType(), value.getRawValue(), getTimestampMs(), key.getExpirationTimestampMs()});
 
         return {};
     }
@@ -76,12 +72,12 @@ namespace kvs
     Status LinearHashStorage::deleteValue(const Key& key)
     {
         MGLockGuard lock{m_storageLock, LockType::kX};
+        clearExpiredKeys();
 
-        Record record;
-        auto found = m_values->find(key.getKey(), record);
-        if (!found) {
+        if (!m_values->contains(key.getKey())) {
             return Status{Status::FailReason::kKeyNotFound};
         }
+        Record record;
         m_values->remove(key.getKey(), record);
         return {};
     }
@@ -124,4 +120,24 @@ namespace kvs
     }
 
     size_t LinearHashStorage::getSize() const { return m_values->size(); }
+
+    bool LinearHashStorage::hasKey(const Key& key) const { return m_values->contains(key.getKey()); }
+
+    void LinearHashStorage::clearExpiredKeys()
+    {
+        std::lock_guard<std::mutex> expLock{m_expiredKeysMutex};
+        std::unordered_set<std::string> keysDeleted;
+        for (const auto& k : m_expiredKeys) {
+            Record rec;
+            m_values->remove(k, rec);
+            keysDeleted.insert(k);
+            if (keysDeleted.size() >= 5) {
+                break;
+            }
+        }
+
+        for (const auto& k : keysDeleted) {
+            m_expiredKeys.erase(k);
+        }
+    }
 }
