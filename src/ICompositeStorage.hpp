@@ -62,6 +62,7 @@ namespace kvs
         }
 
         bool isOk() const { return m_status == Status::kOk; }
+        Status getStatus() const { return m_status; }
 
     private:
         Status m_status = Status::kOk;

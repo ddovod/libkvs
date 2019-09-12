@@ -11,7 +11,8 @@ target_sources(kvs-tests PRIVATE
   src/BasicOperations_test.cpp
   src/LinearHashStorageRegistry_test.cpp
   src/MountingNodes_test.cpp
-  src/SimpleMultiThreaded_test.cpp
+  src/UnmountingNodes_test.cpp
+  # src/SimpleMultiThreaded_test.cpp
   src/KeyRange_test.cpp
   )
 target_include_directories(kvs-tests PRIVATE
