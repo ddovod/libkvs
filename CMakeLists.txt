@@ -67,5 +67,5 @@ add_subdirectory(example)
 ### tests
 add_subdirectory(tests)
 
-### performance tests
-add_subdirectory(perf_tests)
+### load test
+add_subdirectory(load_test)
