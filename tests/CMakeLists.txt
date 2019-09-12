@@ -15,6 +15,7 @@ target_sources(kvs-tests PRIVATE
   src/SimpleMultiThreaded_test.cpp
   src/KeyRange_test.cpp
   src/TimeToLive_test.cpp
+  src/Priorities_test.cpp
   )
 target_include_directories(kvs-tests PRIVATE
   src
