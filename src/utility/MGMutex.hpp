@@ -4,6 +4,7 @@
 #include <list>
 #include <mutex>
 #include <thread>
+#include <unordered_set>
 
 namespace kvs
 {
@@ -32,7 +33,7 @@ namespace kvs
     private:
         std::mutex m_mutex;
         LockType m_currentType = LockType::kNL;
-        std::list<LockNode> m_runningNodes;
-        std::list<LockNode> m_waitingNodes;
+        std::unordered_set<std::thread::id> m_runningThreads;
+        std::list<LockNode> m_waitingThreads;
     };
 }

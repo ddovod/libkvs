@@ -32,29 +32,25 @@ namespace kvs
 {
     void MGMutex::lock(LockType lockType)
     {
+        const auto threadId = std::this_thread::get_id();
+
         LockNode node;
         node.lockType = lockType;
-        node.threadId = std::this_thread::get_id();
+        node.threadId = threadId;
 
         std::unique_lock<std::mutex> lock{m_mutex};
-        if (m_waitingNodes.empty() && ::isCompatible(m_currentType, lockType)) {
-            m_runningNodes.push_back(node);
+        if (m_waitingThreads.empty() && ::isCompatible(m_currentType, lockType)) {
+            m_runningThreads.insert(threadId);
             if (m_currentType == LockType::kNL) {
                 m_currentType = lockType;
             }
         } else {
-            m_waitingNodes.push_back(node);
+            m_waitingThreads.push_back(node);
             lock.unlock();
             while (true) {
                 lock.lock();
-                bool quit = false;
-                for (const auto& el : m_runningNodes) {
-                    if (el.threadId == std::this_thread::get_id()) {
-                        quit = true;
-                        break;
-                    }
-                }
-                if (quit) {
+                auto found = m_runningThreads.find(threadId);
+                if (found != m_runningThreads.end()) {
                     lock.unlock();
                     break;
                 }
@@ -67,27 +63,22 @@ namespace kvs
     void MGMutex::unlock()
     {
         std::lock_guard<std::mutex> lock{m_mutex};
-        for (auto it = m_runningNodes.begin(); it != m_runningNodes.end(); ++it) {
-            if (it->threadId == std::this_thread::get_id()) {
-                m_runningNodes.erase(it);
-                break;
-            }
-        }
+        m_runningThreads.erase(std::this_thread::get_id());
 
-        if (m_runningNodes.empty()) {
+        if (m_runningThreads.empty()) {
             m_currentType = LockType::kNL;
         }
 
-        if (m_runningNodes.empty() && !m_waitingNodes.empty()) {
-            while (!m_waitingNodes.empty()) {
-                auto it = m_waitingNodes.begin();
-                if (m_runningNodes.empty()) {
+        if (m_runningThreads.empty() && !m_waitingThreads.empty()) {
+            while (!m_waitingThreads.empty()) {
+                auto it = m_waitingThreads.begin();
+                if (m_runningThreads.empty()) {
                     m_currentType = it->lockType;
-                    m_runningNodes.push_back(*it);
-                    m_waitingNodes.erase(it);
+                    m_runningThreads.insert(it->threadId);
+                    m_waitingThreads.erase(it);
                 } else if (::isCompatible(m_currentType, it->lockType)) {
-                    m_runningNodes.push_back(*it);
-                    m_waitingNodes.erase(it);
+                    m_runningThreads.insert(it->threadId);
+                    m_waitingThreads.erase(it);
                 } else {
                     break;
                 }
