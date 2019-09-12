@@ -119,9 +119,17 @@ namespace kvs
         value = Record(valueType, rawValue, creationTime, expirationTime);
     }
 
-    size_t LinearHashStorage::getSize() const { return m_values->size(); }
+    size_t LinearHashStorage::getSize() const
+    {
+        MGLockGuard lock{m_storageLock, LockType::kS};
+        return m_values->size();
+    }
 
-    bool LinearHashStorage::hasKey(const Key& key) const { return m_values->contains(key.getKey()); }
+    bool LinearHashStorage::hasKey(const Key& key) const
+    {
+        MGLockGuard lock{m_storageLock, LockType::kS};
+        return m_values->contains(key.getKey());
+    }
 
     void LinearHashStorage::clearExpiredKeys()
     {

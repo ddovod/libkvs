@@ -34,7 +34,7 @@ namespace kvs
         bool hasKey(const Key& key) const override;
 
     private:
-        MGMutex m_storageLock;
+        mutable MGMutex m_storageLock;
         std::unique_ptr<HashTable::BucketManager> m_bucketManager;
         std::unique_ptr<HashTable> m_values;
         std::mutex m_expiredKeysMutex;
