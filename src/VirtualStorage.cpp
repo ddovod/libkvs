@@ -141,6 +141,11 @@ namespace kvs
     {
         MGMultiLockGuard locks;
         if (auto node = resolveNode(key.getPath(), locks, LockType::kIX); node && !node->storages.empty()) {
+            for (const auto& storage : node->storages) {
+                if (storage.storage->hasKey(key)) {
+                    return storage.storage->putValue(key, value);
+                }
+            }
             return node->storages.front().storage->putValue(key, value);
         }
         return Status{Status::FailReason::kNodeNotFound};
