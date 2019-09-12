@@ -82,13 +82,16 @@ Current lock mode of the mutex is changed only when running list becomes empty. 
 This mechanism allows to minimise stagnation time of the waiting threads, so eventually everybody will be allowed to try to proceed.
 
 ## TODO
-- Optimise `getKeysRange` implementation
+- Logs
 - Finer grain locking granularity on the hash table level
 - Finer grain locking granularity for mount/unmount operations
 - More optimal file structure for the hash table
+- Optimise `getKeysRange` implementation
 - Ability to mount single nodes from the volumes instead of whole subtree
-- Logs
+- Ability to remove nodes and volumes
+- Compression
 - Profile
 - More tests
 - Better impementation of MGMutex
 - WAL?
+- B-tree, LSM-tree based nodes implementation
