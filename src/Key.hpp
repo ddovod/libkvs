@@ -21,7 +21,7 @@ namespace kvs
         {
             const auto expMaxMs = std::numeric_limits<int64_t>::max();
             const auto nowMs = getTimestampMs();
-            if (expMaxMs - nowMs <= timeToLiveMs) {
+            if (expMaxMs - nowMs >= timeToLiveMs) {
                 m_expirationTimestampMs = nowMs + timeToLiveMs;
             }
         }
