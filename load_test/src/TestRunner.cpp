@@ -229,11 +229,17 @@ std::string TestRunner::getRandomPath() const
         return generatePath();
     }
     std::lock_guard<std::mutex> lock{m_pathMutex};
+    if (m_storagePaths.empty()) {
+        return generatePath();
+    }
     return getRandomElement(m_storagePaths).first;
 }
 
 uint64_t TestRunner::getRandomMountId() const
 {
     std::lock_guard<std::mutex> lock{m_pathMutex};
+    if (m_mountPoints.empty()) {
+        return 0;
+    }
     return getRandomElement(m_mountPoints).first;
 }
