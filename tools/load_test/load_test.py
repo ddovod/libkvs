@@ -67,4 +67,5 @@ for el in results:
 
 plt.axis([None, None, 0, None])
 plt.legend(labels, loc='best')
+plt.title('Total ops/sec')
 plt.savefig('test_result.png')
