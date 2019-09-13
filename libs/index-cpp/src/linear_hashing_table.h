@@ -718,16 +718,29 @@ public:
 
   // Insert a mapping from key to value into the table, if no mapping from key already exists.
   // Returns true if a mapping from key to value was inserted into the table, false otherwise.
-  bool insert(const KeyType& key, const ValueType& value) {
+  template <typename FuncT>
+  bool insert(const KeyType& key, const ValueType& value, FuncT&& cleanupFilter) {
     size_t bucket_index = calculate_bucket_chain(key);
     Bucket* dummy_bucket;
     size_t dummy_index;
     if (find_internal(key, bucket_index, dummy_bucket, dummy_index)) {
       return false;
     }
+    Bucket* bucket = bucket_chains_[bucket_index].get();
+    const auto& data = bucket->data();
+    bool removed = false;
+    for (size_t i = 0; i < data.size(); i++) {
+      if (cleanupFilter(data[i].first, data[i].second)) {
+        bucket->remove(i);
+        removed = true;
+        break;
+      }
+    }
     insert_internal(key, value, bucket_index);
-    ++metadata_.size;
-    rebalance_split();
+    if (!removed) {
+      ++metadata_.size;
+      rebalance_split();
+    }
     return true;
   }
 

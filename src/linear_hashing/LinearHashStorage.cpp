@@ -44,8 +44,6 @@ namespace kvs
         }
 
         if (record.getExpirationTimestampMs() < getTimestampMs()) {
-            std::lock_guard<std::mutex> expLock{m_expiredKeysMutex};
-            m_expiredKeys.insert(key.getKey());
             return Status{Status::FailReason::kKeyNotFound};
         }
 
@@ -56,15 +54,16 @@ namespace kvs
     Status LinearHashStorage::putValue(const Key& key, const Value& value)
     {
         MGLockGuard lock{m_storageLock, LockType::kX};
-        clearExpiredKeys();
 
         if (m_values->contains(key.getKey())) {
             Record record;
             m_values->remove(key.getKey(), record);
         }
 
+        auto nowMs = getTimestampMs();
         m_values->insert(key.getKey(),
-            Record{value.getType(), value.getRawValue(), getTimestampMs(), key.getExpirationTimestampMs()});
+            Record{value.getType(), value.getRawValue(), getTimestampMs(), key.getExpirationTimestampMs()},
+            [nowMs](const std::string&, const Record& record) { return record.getExpirationTimestampMs() < nowMs; });
 
         return {};
     }
@@ -72,7 +71,6 @@ namespace kvs
     Status LinearHashStorage::deleteValue(const Key& key)
     {
         MGLockGuard lock{m_storageLock, LockType::kX};
-        clearExpiredKeys();
 
         if (!m_values->contains(key.getKey())) {
             return Status{Status::FailReason::kKeyNotFound};
@@ -135,23 +133,5 @@ namespace kvs
         Record record;
         auto found = m_values->find(key.getKey(), record);
         return found && record.getExpirationTimestampMs() >= getTimestampMs();
-    }
-
-    void LinearHashStorage::clearExpiredKeys()
-    {
-        std::lock_guard<std::mutex> expLock{m_expiredKeysMutex};
-        std::unordered_set<std::string> keysDeleted;
-        for (const auto& k : m_expiredKeys) {
-            Record rec;
-            m_values->remove(k, rec);
-            keysDeleted.insert(k);
-            if (keysDeleted.size() >= 5) {
-                break;
-            }
-        }
-
-        for (const auto& k : keysDeleted) {
-            m_expiredKeys.erase(k);
-        }
     }
 }
