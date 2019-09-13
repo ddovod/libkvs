@@ -75,3 +75,27 @@ matrix:
         - cmake -DCMAKE_BUILD_TYPE=Debug -DKVS_TESTS_TSAN=ON ..
         - make -j4
         - ./tests/kvs-tests
+
+    - name: "Load test utility ASAN"
+      os: linux
+      compiler: clang
+      dist: bionic
+      env: *env_common
+      before_script: *before_script_common
+      script:
+        - mkdir build && cd build
+        - cmake -DCMAKE_BUILD_TYPE=Debug -DKVS_TESTS_ASAN=ON ..
+        - make -j4
+        - ./load_test/kvs-load-test --cacheSize=33554432 --recordSize=1024 --maxNodes=20 --reads=1000 --writes=70 --deletes=70 --mounts=1 --unmounts=1 --krqs=1 --testTime=5000 --window=1000 --keyLength=8 --rndSeed=0 --dataSize=100 --threads=4
+
+    - name: "Load test utility TSAN"
+      os: linux
+      compiler: clang
+      dist: bionic
+      env: *env_common
+      before_script: *before_script_common
+      script:
+        - mkdir build && cd build
+        - cmake -DCMAKE_BUILD_TYPE=Debug -DKVS_TESTS_TSAN=ON ..
+        - make -j4
+        - ./load_test/kvs-load-test --cacheSize=33554432 --recordSize=1024 --maxNodes=20 --reads=1000 --writes=70 --deletes=70 --mounts=1 --unmounts=1 --krqs=1 --testTime=5000 --window=1000 --keyLength=8 --rndSeed=0 --dataSize=100 --threads=4
