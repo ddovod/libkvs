@@ -1,7 +1,7 @@
 
 #include "StringUtils.hpp"
 #include <algorithm>
-#include <random>
+#include "utility/RandomUtils.hpp"
 
 namespace
 {
@@ -12,9 +12,7 @@ namespace
 
     size_t stringLength = sizeof(chars) - 1;
 
-    std::mt19937 m_rand;
-
-    char getRandomChar() { return chars[m_rand() % stringLength]; }  // NOLINT
+    char getRandomChar() { return chars[kvs::utility::random(stringLength)]; }  // NOLINT
 }
 
 namespace kvs
@@ -48,7 +46,8 @@ namespace kvs
     std::vector<std::string> split(const std::string& str, const std::string& delim)
     {
         std::vector<std::string> res;
-        std::size_t current, previous = 0;
+        std::size_t current = 0;
+        std::size_t previous = 0;
         current = str.find(delim);
         while (current != std::string::npos) {
             res.push_back(str.substr(previous, current - previous));
@@ -66,11 +65,11 @@ namespace kvs
         std::string::const_iterator end = original.end();
         std::string::const_iterator next = std::find(start, end, separator);
         while (next != end) {
-            results.push_back(std::string(start, next));
+            results.emplace_back(start, next);
             start = next + 1;
             next = std::find(start, end, separator);
         }
-        results.push_back(std::string(start, next));
+        results.emplace_back(start, next);
         return results;
     }
 }

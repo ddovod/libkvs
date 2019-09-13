@@ -97,7 +97,6 @@ private:
     };
 
     TestOptions m_opts;
-    mutable std::mt19937 m_rand;
     std::vector<OperationWeight> m_operationWeights;
     size_t m_totalWeight = 0;
     TestResult m_result;

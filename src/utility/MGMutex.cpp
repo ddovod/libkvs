@@ -11,7 +11,7 @@ namespace
     bool isCompatible(kvs::LockType lockType1, kvs::LockType lockType2)
     {
         // clang-format off
-        static const bool compatibilityMatrix[6][6] = {
+        static const bool compatibilityMatrix[6][6] = { // NOLINT
             {true, true,  true,  true,  true,  true},
             {true, true,  true,  true,  true,  false},
             {true, true,  true,  false, false, false},

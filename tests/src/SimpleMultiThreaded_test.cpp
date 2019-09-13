@@ -6,6 +6,7 @@
 #include <iostream>
 #include <memory>
 #include <thread>
+#include "utility/RandomUtils.hpp"
 #include "utility/StringUtils.hpp"
 
 TEST_CASE("Simple multithreaded operations test")
@@ -47,8 +48,8 @@ TEST_CASE("Simple multithreaded operations test")
             int testLengthMs = 5000;
             while (duration_cast<milliseconds>(high_resolution_clock::now() - start).count() < testLengthMs) {
                 const std::string key = kvs::generateString(5);
-                const std::string& path = storagePaths[rand() % storagePaths.size()];
-                auto rndValue = rand() % 100;
+                const std::string& path = storagePaths[kvs::utility::random(storagePaths.size())];
+                auto rndValue = kvs::utility::random(100);
                 if (rndValue < 6) {
                     kvs::Data value;
                     value.buffer.resize(100);
