@@ -17,12 +17,6 @@ namespace kvs
 {
     std::string generateString(size_t length)
     {
-        static auto unused = [] {
-            srand(static_cast<unsigned int>(time(nullptr)));
-            return 0;
-        }();
-        (void)unused;
-
         std::string res;
         res.reserve(length);
         for (size_t i = 0; i < length; i++) {
