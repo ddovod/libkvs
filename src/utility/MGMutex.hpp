@@ -33,7 +33,7 @@ namespace kvs
     private:
         std::mutex m_mutex;
         LockType m_currentType = LockType::kNL;
-        std::unordered_set<std::thread::id> m_runningThreads;
+        std::list<LockNode> m_runningThreads;
         std::list<LockNode> m_waitingThreads;
     };
 }

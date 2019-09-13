@@ -145,7 +145,7 @@ namespace kvs
     {
         TreeNode* node = &m_rootNode;
         std::string name;
-        for (const auto& comp : split(path, "/")) {
+        for (const auto& comp : split(path, '/')) {
             if (!name.empty()) {
                 name.append("_");
             }

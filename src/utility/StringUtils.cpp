@@ -1,5 +1,7 @@
 
 #include "StringUtils.hpp"
+#include <algorithm>
+#include <random>
 
 namespace
 {
@@ -8,9 +10,11 @@ namespace
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
 
-    int stringLength = sizeof(chars) - 1;
+    size_t stringLength = sizeof(chars) - 1;
 
-    char getRandomChar() { return chars[rand() % stringLength]; }  // NOLINT
+    std::mt19937 m_rand;
+
+    char getRandomChar() { return chars[m_rand() % stringLength]; }  // NOLINT
 }
 
 namespace kvs
@@ -23,5 +27,50 @@ namespace kvs
             res += ::getRandomChar();
         }
         return res;
+    }
+
+    bool startsWith(const std::string& value, const std::string& starting)
+    {
+        if (starting.size() > value.size()) {
+            return false;
+        }
+        return std::equal(starting.begin(), starting.end(), value.begin());
+    }
+
+    bool endsWith(const std::string& value, const std::string& ending)
+    {
+        if (ending.size() > value.size()) {
+            return false;
+        }
+        return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+    }
+
+    std::vector<std::string> split(const std::string& str, const std::string& delim)
+    {
+        std::vector<std::string> res;
+        std::size_t current, previous = 0;
+        current = str.find(delim);
+        while (current != std::string::npos) {
+            res.push_back(str.substr(previous, current - previous));
+            previous = current + delim.length();
+            current = str.find(delim, previous);
+        }
+        res.push_back(str.substr(previous, current - previous));
+        return res;
+    }
+
+    std::vector<std::string> split(const std::string& original, char separator)
+    {
+        std::vector<std::string> results;
+        std::string::const_iterator start = original.begin();
+        std::string::const_iterator end = original.end();
+        std::string::const_iterator next = std::find(start, end, separator);
+        while (next != end) {
+            results.push_back(std::string(start, next));
+            start = next + 1;
+            next = std::find(start, end, separator);
+        }
+        results.push_back(std::string(start, next));
+        return results;
     }
 }

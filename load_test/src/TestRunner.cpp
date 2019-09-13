@@ -23,7 +23,7 @@
 TestRunner::TestRunner(const TestOptions& options)
     : m_opts(options)
 {
-    srand(m_opts.rndSeed);
+    m_rand = std::mt19937{m_opts.rndSeed};
     m_opts.maxNodes = std::max(1ul, m_opts.maxNodes);
     m_operationWeights = {
         {Operation::kRead, m_opts.readsWeight},
@@ -124,7 +124,7 @@ void TestRunner::threadFunc()
 
 TestRunner::Operation TestRunner::getRandomOperation() const
 {
-    int rndValue = rand() % m_totalWeight + 1;
+    int rndValue = m_rand() % m_totalWeight + 1;
     size_t i = 0;
     while (true) {
         rndValue -= m_operationWeights[i].weight;
@@ -205,15 +205,15 @@ bool TestRunner::performUnmountOp()
 
 void TestRunner::performKeyRangeQueryOp()
 {
-    size_t offset = rand() % 1000;
-    size_t count = rand() % 1000;
+    size_t offset = m_rand() % 1000;
+    size_t count = m_rand() % 1000;
     kvs::KeysRange keysRange;
     m_storage->getKeysRange({getRandomPath(), offset, count}, &keysRange);
 }
 
 std::string TestRunner::getRandomKey() const
 {
-    if (rand() % 100 < 3) {
+    if (m_rand() % 100 < 3) {
         return kvs::generateString(m_opts.keyLength);
     }
     std::lock_guard<std::mutex> lock{m_keyMutex};
@@ -225,7 +225,7 @@ std::string TestRunner::getRandomKey() const
 
 std::string TestRunner::getRandomPath() const
 {
-    if (rand() % 100 < 3) {
+    if (m_rand() % 100 < 3) {
         return generatePath();
     }
     std::lock_guard<std::mutex> lock{m_pathMutex};

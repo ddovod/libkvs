@@ -232,7 +232,7 @@ namespace kvs
     {
         locks.addLock(m_rootNode.nodeLock, type);
         Node* node = &m_rootNode;
-        for (const auto& comp : split(path, "/")) {
+        for (const auto& comp : split(path, '/')) {
             auto found = node->children.find(comp);
             if (found == node->children.end()) {
                 return {};
@@ -246,7 +246,7 @@ namespace kvs
     VirtualStorage::Node* VirtualStorage::createNodesForPath(const std::string& path)
     {
         Node* node = &m_rootNode;
-        for (const auto& comp : split(path, "/")) {
+        for (const auto& comp : split(path, '/')) {
             auto found = node->children.find(comp);
             if (found == node->children.end()) {
                 auto newNode = std::make_unique<Node>();

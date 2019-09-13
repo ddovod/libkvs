@@ -1,5 +1,6 @@
 
 #include "MGMutex.hpp"
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <mutex>
@@ -40,7 +41,7 @@ namespace kvs
 
         std::unique_lock<std::mutex> lock{m_mutex};
         if (m_waitingThreads.empty() && ::isCompatible(m_currentType, lockType)) {
-            m_runningThreads.insert(threadId);
+            m_runningThreads.push_back(node);
             if (m_currentType == LockType::kNL) {
                 m_currentType = lockType;
             }
@@ -49,7 +50,9 @@ namespace kvs
             lock.unlock();
             while (true) {
                 lock.lock();
-                auto found = m_runningThreads.find(threadId);
+                auto found = std::find_if(m_runningThreads.begin(), m_runningThreads.end(), [threadId](const auto& el) {
+                    return el.threadId == threadId;
+                });
                 if (found != m_runningThreads.end()) {
                     lock.unlock();
                     break;
@@ -63,7 +66,11 @@ namespace kvs
     void MGMutex::unlock()
     {
         std::lock_guard<std::mutex> lock{m_mutex};
-        m_runningThreads.erase(std::this_thread::get_id());
+        auto found = std::find_if(m_runningThreads.begin(), m_runningThreads.end(), [](const auto& el) {
+            return el.threadId == std::this_thread::get_id();
+        });
+        assert(found != m_runningThreads.end());
+        m_runningThreads.erase(found);
 
         if (m_runningThreads.empty()) {
             m_currentType = LockType::kNL;
@@ -74,10 +81,10 @@ namespace kvs
                 auto it = m_waitingThreads.begin();
                 if (m_runningThreads.empty()) {
                     m_currentType = it->lockType;
-                    m_runningThreads.insert(it->threadId);
+                    m_runningThreads.push_back(*it);
                     m_waitingThreads.erase(it);
                 } else if (::isCompatible(m_currentType, it->lockType)) {
-                    m_runningThreads.insert(it->threadId);
+                    m_runningThreads.push_back(*it);
                     m_waitingThreads.erase(it);
                 } else {
                     break;
