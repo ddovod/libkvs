@@ -1,0 +1,109 @@
+
+Scenarios:
+  - Name: Default_(1-thread)_(8mb-cache)_(100-nodes)
+    TotalRuns: 3
+    threads: 1
+    cacheSize: 8388608 # 8Mb
+    recordSize: 1024
+    dataSize: 100
+    maxNodes: 100
+    reads: 1000
+    writes: 70
+    deletes: 70
+    mounts: 1
+    unmounts: 0
+    krqs: 5
+    testTime: 30000
+    window: 1000
+    keyLength: 8
+    rndSeed: 0
+
+  - Name: Default_(4-thread)_(8mb-cache)_(100-nodes)
+    TotalRuns: 3
+    threads: 4
+    cacheSize: 8388608 # 8Mb
+    recordSize: 1024
+    dataSize: 100
+    maxNodes: 100
+    reads: 1000
+    writes: 70
+    deletes: 70
+    mounts: 1
+    unmounts: 0
+    krqs: 5
+    testTime: 30000
+    window: 1000
+    keyLength: 8
+    rndSeed: 0
+
+  - Name: Default_(1-thread)_(32mb-cache)_(100-nodes)
+    TotalRuns: 3
+    threads: 1
+    cacheSize: 33554432 # 32Mb
+    recordSize: 1024
+    dataSize: 100
+    maxNodes: 100
+    reads: 1000
+    writes: 70
+    deletes: 70
+    mounts: 1
+    unmounts: 0
+    krqs: 5
+    testTime: 30000
+    window: 1000
+    keyLength: 8
+    rndSeed: 0
+
+  - Name: Default_(4-thread)_(32mb-cache)_(100-nodes)
+    TotalRuns: 3
+    threads: 4
+    cacheSize: 33554432 # 32Mb
+    recordSize: 1024
+    dataSize: 100
+    maxNodes: 100
+    reads: 1000
+    writes: 70
+    deletes: 70
+    mounts: 1
+    unmounts: 0
+    krqs: 5
+    testTime: 30000
+    window: 1000
+    keyLength: 8
+    rndSeed: 0
+
+  - Name: Default_(1-thread)_(32mb-cache)_(20-nodes)
+    TotalRuns: 3
+    threads: 1
+    cacheSize: 33554432 # 32Mb
+    recordSize: 1024
+    dataSize: 100
+    maxNodes: 20
+    reads: 1000
+    writes: 70
+    deletes: 70
+    mounts: 1
+    unmounts: 0
+    krqs: 5
+    testTime: 30000
+    window: 1000
+    keyLength: 8
+    rndSeed: 0
+
+  - Name: Default_(4-thread)_(32mb-cache)_(20-nodes)
+    TotalRuns: 3
+    threads: 4
+    cacheSize: 33554432 # 32Mb
+    recordSize: 1024
+    dataSize: 100
+    maxNodes: 20
+    reads: 1000
+    writes: 70
+    deletes: 70
+    mounts: 1
+    unmounts: 0
+    krqs: 5
+    testTime: 30000
+    window: 1000
+    keyLength: 8
+    rndSeed: 0
