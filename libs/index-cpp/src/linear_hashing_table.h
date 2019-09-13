@@ -771,17 +771,25 @@ public:
     return metadata_.size;
   }
 
-  std::vector<KeyType> getKeysRange(size_t index_from, size_t keys_count) {
+  template <typename FuncT>
+  std::vector<KeyType> getKeysRange(size_t index_from, size_t keys_count, FuncT&& filter) {
     size_t iBucket = 0;
     size_t iRecord = 0;
     while (index_from > 0 && iBucket < bucket_chains_.size()) {
       Bucket* bucket = bucket_chains_[iBucket].get();
-      if (bucket->size() > index_from) {
-        iRecord = bucket->size() - index_from;
-        index_from = 0;
-      } else {
-        index_from -= bucket->size();
+      const auto& data = bucket->data();
+      for (const auto& el : data) {
+        if (filter(el.first, el.second)) {
+          index_from--;
+        }
+        iRecord++;
+        if (index_from == 0) {
+          break;
+        }
+      }
+      if (index_from != 0 || iRecord == data.size()) {
         iBucket++;
+        iRecord = 0;
       }
     }
 
@@ -791,8 +799,10 @@ public:
       Bucket* bucket = bucket_chains_[iBucket].get();
       const auto& data = bucket->data();
       for (; iRecord < data.size(); iRecord++) {
-        result.push_back(data[iRecord].first);
-        keys_count--;
+        if (filter(data[iRecord].first, data[iRecord].second)) {
+          result.push_back(data[iRecord].first);
+          keys_count--;
+        }
         if (keys_count == 0) {
           break;
         }

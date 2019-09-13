@@ -86,7 +86,10 @@ namespace kvs
     {
         MGLockGuard lock{m_storageLock, LockType::kS};
 
-        auto result = m_values->getKeysRange(keys.getIndexFrom(), keys.getKeysCount());
+        auto nowMs = getTimestampMs();
+        auto result = m_values->getKeysRange(keys.getIndexFrom(),
+            keys.getKeysCount(),
+            [nowMs](const std::string&, const Record& record) { return record.getExpirationTimestampMs() >= nowMs; });
         *keysRange = KeysRange{std::move(result)};
         return {};
     }
@@ -128,7 +131,10 @@ namespace kvs
     bool LinearHashStorage::hasKey(const Key& key) const
     {
         MGLockGuard lock{m_storageLock, LockType::kS};
-        return m_values->contains(key.getKey());
+
+        Record record;
+        auto found = m_values->find(key.getKey(), record);
+        return found && record.getExpirationTimestampMs() >= getTimestampMs();
     }
 
     void LinearHashStorage::clearExpiredKeys()
