@@ -63,7 +63,9 @@ TestResult TestRunner::run()
     for (auto& t : threads) {
         t->join();
     }
-    m_result.samples.push_back(m_counters.reset());
+
+    auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(ClockT::now() - m_intervalStartTime).count();
+    m_result.samples.push_back(m_counters.reset(diff));
     return m_result;
 }
 
@@ -114,7 +116,7 @@ void TestRunner::threadFunc()
         auto now = ClockT::now();
         auto diff = duration_cast<milliseconds>(now - m_intervalStartTime).count();
         if (diff >= m_opts.windowSize) {
-            m_result.samples.push_back(m_counters.reset());
+            m_result.samples.push_back(m_counters.reset(diff));
             m_intervalStartTime = now;
         }
     }

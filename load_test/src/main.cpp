@@ -34,12 +34,13 @@ int main(int argc, char** argv)
     auto result = TestRunner(opts).run();
 
     for (const auto& sample : result.samples) {
-        std::cout << sample.totalOps << " : "
-                  << sample.readOps << " , "
-                  << sample.writeOps << " , "
-                  << sample.deleteOps << " , "
-                  << sample.mountOps << " , "
-                  << sample.unmountOps << " , "
+        std::cout << sample.timePeriodMs << ","
+                  << sample.totalOps << ","
+                  << sample.readOps << ","
+                  << sample.writeOps << ","
+                  << sample.deleteOps << ","
+                  << sample.mountOps << ","
+                  << sample.unmountOps << ","
                   << sample.keyRangeQueryOps
                   << std::endl;
     }

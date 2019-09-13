@@ -34,6 +34,7 @@ struct TestResult
 {
     struct Sample
     {
+        uint64_t timePeriodMs = 0;
         size_t totalOps = 0;
         size_t readOps = 0;
         size_t writeOps = 0;
@@ -53,9 +54,10 @@ struct TestResult
         std::atomic<size_t> unmountOps = 0;
         std::atomic<size_t> keyRangeQueryOps = 0;
 
-        Sample reset()
+        Sample reset(uint64_t timePeriodMs)
         {
             Sample sample;
+            sample.timePeriodMs = timePeriodMs;
             sample.totalOps = totalOps.exchange(0);
             sample.readOps = readOps.exchange(0);
             sample.writeOps = writeOps.exchange(0);
