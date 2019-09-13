@@ -2,8 +2,10 @@
 #include "LinearHashStorageRegistry.hpp"
 #include <cassert>
 #include <cstdio>
+#include <iostream>
 #include <memory>
 #include "IStorageRegistry.hpp"
+#include "IVolume.hpp"
 #include "LinearHashStorage.hpp"
 #include "LinearHashVolume.hpp"
 
@@ -47,6 +49,16 @@ namespace kvs
         assert(counterFound->second.second >= 0);
 
         if (counterFound->second.second == 0) {
+            auto fullKey = foundKey->second;
+            auto delimPos = fullKey.find(':');
+            auto volumeKey = fullKey.substr(0, delimPos);
+            auto nodePath = fullKey.substr(delimPos + 1);
+            auto volume = m_volumes.find(volumeKey);
+            assert(volume != m_volumes.end());
+            UnloadStorageOptions unloadOptions;
+            unloadOptions.path = foundKey->second.substr(foundKey->second.find(':') + 1);
+            volume->second->unloadStorage(unloadOptions);
+
             m_storageKeys.erase(foundKey);
             m_storageCounters.erase(counterFound);
         }
