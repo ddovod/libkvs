@@ -15,13 +15,13 @@ namespace kvs
     LinearHashVolume::LinearHashVolume(const std::string& filepath)
     {
         m_filepath = filepath;
-        m_volumeName = path{filepath}.filename();
+        m_volumeName = utility::path{filepath}.filename();
 
-        auto parentPath = path{filepath}.parent_path();
+        auto parentPath = utility::path{filepath}.parent_path();
         if (parentPath.string() != filepath) {
             m_parentPath = parentPath.string();
             if (!parentPath.exists()) {
-                mkdirp(getcwd(), parentPath);
+                utility::mkdirp(utility::getcwd(), parentPath);
             }
         }
 
@@ -145,7 +145,7 @@ namespace kvs
     {
         TreeNode* node = &m_rootNode;
         std::string name;
-        for (const auto& comp : split(path, '/')) {
+        for (const auto& comp : utility::split(path, '/')) {
             if (!name.empty()) {
                 name.append("_");
             }
@@ -154,9 +154,9 @@ namespace kvs
             if (found == node->children.end()) {
                 auto newNode = std::make_unique<TreeNode>();
                 newNode->node.primaryFilepath =
-                    (kvs::path(m_parentPath) / kvs::path(m_volumeName + "_primary_" + name)).string();
+                    (utility::path(m_parentPath) / utility::path(m_volumeName + "_primary_" + name)).string();
                 newNode->node.overflowFilepath =
-                    (kvs::path(m_parentPath) / kvs::path(m_volumeName + "_overflow_" + name)).string();
+                    (utility::path(m_parentPath) / utility::path(m_volumeName + "_overflow_" + name)).string();
                 found = node->children.emplace(comp, std::move(newNode)).first;
                 m_isDirty = true;
             }

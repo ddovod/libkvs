@@ -7,6 +7,7 @@
 
 namespace kvs
 {
+    /** A lock guard foe the MGMutex. */
     class MGLockGuard
     {
     public:
@@ -33,6 +34,10 @@ namespace kvs
         MGMutex* m_lock = nullptr;
     };
 
+    /**
+     * A lock guard to lock several mutexes.
+     * Unlocks in reverse order.
+     */
     class MGMultiLockGuard
     {
     public:

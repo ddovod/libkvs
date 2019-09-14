@@ -5,6 +5,7 @@
 
 namespace kvs
 {
+    /** A type of the value. Add new values to the end. */
     enum class ValueType : uint8_t
     {
         kUndefined = 0,

@@ -47,7 +47,7 @@ TEST_CASE("Simple multithreaded operations test")
             auto start = high_resolution_clock::now();
             int testLengthMs = 5000;
             while (duration_cast<milliseconds>(high_resolution_clock::now() - start).count() < testLengthMs) {
-                const std::string key = kvs::generateString(5);
+                const std::string key = kvs::utility::generateString(5);
                 const std::string& path = storagePaths[kvs::utility::random(storagePaths.size())];
                 auto rndValue = kvs::utility::random(100);
                 if (rndValue < 6) {

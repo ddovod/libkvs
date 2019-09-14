@@ -7,6 +7,7 @@
 
 namespace kvs
 {
+    /** A low level value record. */
     class Record
     {
     public:
@@ -22,9 +23,16 @@ namespace kvs
         {
         }
 
+        /** Returns the type of the value. */
         ValueType getValueType() const { return m_valueType; }
+
+        /** Returns the byte array which stores the value. */
         const std::vector<uint8_t>& getRawValue() const { return m_rawValue; }
+
+        /** Returns the timestamp of the value creation, in milliseconds. */
         int64_t getCreationTimestampMs() const { return m_creationTimestampMs; }
+
+        /** Returns the timestamp of the value expiration, in milliseconds. */
         int64_t getExpirationTimestampMs() const { return m_expirationTimestampMs; }
 
     private:

@@ -15,7 +15,7 @@ namespace
     char getRandomChar() { return chars[kvs::utility::random(stringLength)]; }  // NOLINT
 }
 
-namespace kvs
+namespace kvs::utility
 {
     std::string generateString(size_t length)
     {
@@ -33,29 +33,6 @@ namespace kvs
             return false;
         }
         return std::equal(starting.begin(), starting.end(), value.begin());
-    }
-
-    bool endsWith(const std::string& value, const std::string& ending)
-    {
-        if (ending.size() > value.size()) {
-            return false;
-        }
-        return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
-    }
-
-    std::vector<std::string> split(const std::string& str, const std::string& delim)
-    {
-        std::vector<std::string> res;
-        std::size_t current = 0;
-        std::size_t previous = 0;
-        current = str.find(delim);
-        while (current != std::string::npos) {
-            res.push_back(str.substr(previous, current - previous));
-            previous = current + delim.length();
-            current = str.find(delim, previous);
-        }
-        res.push_back(str.substr(previous, current - previous));
-        return res;
     }
 
     std::vector<std::string> split(const std::string& original, char separator)

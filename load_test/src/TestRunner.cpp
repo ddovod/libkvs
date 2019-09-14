@@ -146,7 +146,7 @@ void TestRunner::performWriteOp()
 {
     kvs::Data value;
     value.buffer.resize(m_opts.dataSize);
-    m_storage->putValue({kvs::generateString(m_opts.keyLength), generatePath()}, {value});
+    m_storage->putValue({kvs::utility::generateString(m_opts.keyLength), generatePath()}, {value});
 }
 
 void TestRunner::performDeleteOp()
@@ -214,11 +214,11 @@ void TestRunner::performKeyRangeQueryOp()
 std::string TestRunner::getRandomKey() const
 {
     if (kvs::utility::random(100) < 3) {
-        return kvs::generateString(m_opts.keyLength);
+        return kvs::utility::generateString(m_opts.keyLength);
     }
     std::lock_guard<std::mutex> lock{m_keyMutex};
     if (m_keysInUse.empty()) {
-        return kvs::generateString(m_opts.keyLength);
+        return kvs::utility::generateString(m_opts.keyLength);
     }
     return getRandomElement(m_keysInUse);
 }

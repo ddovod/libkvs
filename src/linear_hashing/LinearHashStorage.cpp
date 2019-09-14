@@ -43,7 +43,7 @@ namespace kvs
             return Status{Status::FailReason::kKeyNotFound};
         }
 
-        if (record.getExpirationTimestampMs() < getTimestampMs()) {
+        if (record.getExpirationTimestampMs() < utility::getTimestampMs()) {
             return Status{Status::FailReason::kKeyNotFound};
         }
 
@@ -60,9 +60,9 @@ namespace kvs
             m_values->remove(key.getKey(), record);
         }
 
-        auto nowMs = getTimestampMs();
+        auto nowMs = utility::getTimestampMs();
         m_values->insert(key.getKey(),
-            Record{value.getType(), value.getRawValue(), getTimestampMs(), key.getExpirationTimestampMs()},
+            Record{value.getType(), value.getRawValue(), utility::getTimestampMs(), key.getExpirationTimestampMs()},
             [nowMs](const std::string&, const Record& record) { return record.getExpirationTimestampMs() < nowMs; });
 
         return {};
@@ -84,7 +84,7 @@ namespace kvs
     {
         MGLockGuard lock{m_storageLock, LockType::kS};
 
-        auto nowMs = getTimestampMs();
+        auto nowMs = utility::getTimestampMs();
         auto result = m_values->getKeysRange(keys.getIndexFrom(),
             keys.getKeysCount(),
             [nowMs](const std::string&, const Record& record) { return record.getExpirationTimestampMs() >= nowMs; });
@@ -132,6 +132,6 @@ namespace kvs
 
         Record record;
         auto found = m_values->find(key.getKey(), record);
-        return found && record.getExpirationTimestampMs() >= getTimestampMs();
+        return found && record.getExpirationTimestampMs() >= utility::getTimestampMs();
     }
 }

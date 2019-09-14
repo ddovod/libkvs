@@ -2,7 +2,7 @@
 #include "TimeUtils.hpp"
 #include <chrono>
 
-namespace kvs
+namespace kvs::utility
 {
     int64_t getTimestampMs()
     {

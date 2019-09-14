@@ -11,6 +11,7 @@
 
 namespace kvs
 {
+    /** A main interface of the storage with common operations. */
     class IStorage
     {
     public:

@@ -11,6 +11,7 @@
 
 namespace kvs
 {
+    /** A wrapper for a value. */
     class Value
     {
     public:
@@ -29,14 +30,22 @@ namespace kvs
         {
         }
 
+        /** Returns a type of the value. */
         ValueType getType() const { return m_type; }
 
+        /**
+         * Returns a value converted to a specific type.
+         * Throws a `ValueTypeMismatch` exception if the provided
+         * type doesn't match to the actual.
+         * \tparam T Desired type of the value.
+         */
         template <typename T>
         T getValue() const
         {
             return detail::ValueTraits<std::decay_t<T>>::getValue(m_value, m_type);
         }
 
+        /** Returns the byte array with the value. */
         const std::vector<uint8_t>& getRawValue() const { return m_value; }
 
     private:

@@ -3,14 +3,16 @@
 
 namespace kvs
 {
+    /** A wrapper of the status of common storage operation. */
     class Status
     {
     public:
+        /** Status of the operation. */
         enum class FailReason
         {
-            kOk,
-            kNodeNotFound,
-            kKeyNotFound,
+            kOk,           /** Everything is fine. */
+            kNodeNotFound, /** Target node not found. */
+            kKeyNotFound,  /** Target key not found. */
         };
 
         Status() = default;

@@ -12,7 +12,7 @@ std::string generatePath()
         if (!result.empty()) {
             result.append("/");
         }
-        result.append(kvs::generateString(1));
+        result.append(kvs::utility::generateString(1));
     }
     return result;
 }

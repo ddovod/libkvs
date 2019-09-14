@@ -6,6 +6,10 @@
 
 namespace kvs
 {
+    /**
+     * Exception which is thrown when one tries to get the typed
+     * value with incorrect type.
+     */
     class ValueTypeMismatch : public std::exception
     {
     public:

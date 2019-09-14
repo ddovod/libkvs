@@ -8,22 +8,18 @@
 
 namespace kvs
 {
+    /** A locking mode. */
     enum class LockType
     {
-        kNL = 0,
-        kIS,
-        kIX,
-        kS,
-        kSIX,
-        kX,
+        kNL = 0, /** Null lock. */
+        kIS,     /** Intension shared lock. */
+        kIX,     /** Intension exclusive lock. */
+        kS,      /** Shared lock. */
+        kSIX,    /** Shared intention exclusive lock. */
+        kX,      /** Exclusive lock. */
     };
 
-    struct LockNode
-    {
-        std::thread::id threadId;
-        LockType lockType = LockType::kNL;
-    };
-
+    /** A multiple granularity locking mutex. */
     class MGMutex
     {
     public:
@@ -31,6 +27,12 @@ namespace kvs
         void unlock();
 
     private:
+        struct LockNode
+        {
+            std::thread::id threadId;
+            LockType lockType = LockType::kNL;
+        };
+
         std::mutex m_mutex;
         LockType m_currentType = LockType::kNL;
         std::list<LockNode> m_runningThreads;

@@ -7,12 +7,14 @@
 
 namespace kvs
 {
+    /** Options for load of the storage node operation. */
     struct LoadStorageOptions
     {
-        std::string path;
-        HashTableParams hashTableParams;
+        std::string path;                /** Node path. */
+        HashTableParams hashTableParams; /** Parameters of the hash table. */
     };
 
+    /** A wrapper for the load operation result. */
     class LoadStorageResult
     {
     public:
@@ -28,6 +30,8 @@ namespace kvs
         }
 
         bool isOk() const { return m_status == Status::kOk; }
+
+        /** Returns the root node of the loaded subtree. */
         std::unique_ptr<StorageNode>& getRoot() { return m_root; }
 
     private:
@@ -35,11 +39,13 @@ namespace kvs
         std::unique_ptr<StorageNode> m_root;
     };
 
+    /** Options for the unload operation. */
     struct UnloadStorageOptions
     {
-        std::string path;
+        std::string path; /** Path to the node to unload. */
     };
 
+    /** A wrapper for the unload operation result. */
     class UnloadStorageResult
     {
     public:
@@ -59,6 +65,7 @@ namespace kvs
         Status m_status = Status::kOk;
     };
 
+    /** An interface of the volume. */
     class IVolume
     {
     public:

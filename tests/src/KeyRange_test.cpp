@@ -23,7 +23,7 @@ TEST_CASE("Key range query")
 
     std::unordered_map<std::string, std::string> dataA;
     for (size_t i = 0; i < 10; i++) {
-        dataA["key_" + std::to_string(i)] = kvs::generateString();
+        dataA["key_" + std::to_string(i)] = kvs::utility::generateString();
     }
     for (const auto& el : dataA) {
         auto status = storage->putValue({el.first, "A"}, {el.second});
@@ -59,7 +59,7 @@ TEST_CASE("Key range query")
 
     std::unordered_map<std::string, std::string> dataB;
     for (size_t i = 7; i < 16; i++) {
-        dataB["key_" + std::to_string(i)] = kvs::generateString();
+        dataB["key_" + std::to_string(i)] = kvs::utility::generateString();
     }
     for (const auto& el : dataB) {
         status = storage->putValue({el.first, "B"}, {el.second});
@@ -108,7 +108,7 @@ TEST_CASE("Key range query")
 
     std::unordered_map<std::string, std::string> dataC;
     for (size_t i = 0; i < 20; i++) {
-        dataC["key_" + std::to_string(i)] = kvs::generateString();
+        dataC["key_" + std::to_string(i)] = kvs::utility::generateString();
     }
     for (const auto& el : dataC) {
         status = storage->putValue({el.first, "C"}, {el.second});

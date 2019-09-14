@@ -9,21 +9,24 @@
 
 namespace kvs
 {
+    /** Options for acquire operation. */
     struct StorageAcquisitionOptions
     {
-        std::string volumeFilePath;
-        std::string nodePath;
-        HashTableParams hashTableParams;
+        std::string volumeFilePath;      /** File path of the volume. */
+        std::string nodePath;            /** Full path to the node. */
+        HashTableParams hashTableParams; /** Parameters of the hash table. */
     };
 
+    /** A wrapper for the acquire operation result. */
     class StorageAcquisitionResult
     {
     public:
+        /** Status of the operation. */
         enum class Status
         {
-            kOk,
-            kVolumeLoadError,
-            kStorageLoadError,
+            kOk,               /** Everything is fine. */
+            kVolumeLoadError,  /** Error during volume loading. */
+            kStorageLoadError, /** Error during storage node loading. */
         };
 
         StorageAcquisitionResult(std::unique_ptr<StorageNode>&& root, Status status)
@@ -46,11 +49,13 @@ namespace kvs
         Status m_status = Status::kOk;
     };
 
+    /** Options for release operation. */
     struct StorageReleaseOptions
     {
-        IStorageImpl* storage = nullptr;
+        IStorageImpl* storage = nullptr; /** Pointer to the storage to release. */
     };
 
+    /** A wrapper for the release operation result. */
     class StorageReleaseResult
     {
     public:
@@ -72,6 +77,12 @@ namespace kvs
         Status m_status = Status::kOk;
     };
 
+    /**
+     * An interface of the storage registry.
+     * Storage registry is a "storage of the storages".
+     * It manages lifetime of the nodes an volumes
+     * probably with reference counting under the hood.
+     */
     class IStorageRegistry
     {
     public:

@@ -5,6 +5,7 @@
 
 namespace kvs
 {
+    /** An extended interface of the storage, used by the implementation. */
     class IStorageImpl : public IStorage
     {
     public:

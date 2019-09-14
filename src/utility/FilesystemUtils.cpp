@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-namespace kvs
+namespace kvs::utility
 {
     bool mkdir(const path& p)
     {

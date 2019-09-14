@@ -13,6 +13,10 @@
 
 namespace kvs
 {
+    /**
+     * An implementation of the virtual storage.
+     * This is the main interface of the library.
+     */
     class VirtualStorage : public ICompositeStorage
     {
     public:
